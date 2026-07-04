@@ -1,0 +1,168 @@
+aid: waystar
+url: https://raw.githubusercontent.com/api-evangelist/waystar/refs/heads/main/apis.yml
+name: Waystar
+kind: company
+description: Waystar is a healthcare payments and revenue cycle management (RCM)
+  software company that operates a national clearinghouse connecting providers to
+  payers. Its cloud platform spans financial clearance (eligibility, prior
+  authorization, patient estimation), claim management, payment and remittance
+  management, and denial prevention and recovery. Waystar exposes integration
+  through REST APIs, web services, HL7, sFTP/batch, RPA, and X12 EDI transactions
+  (270/271 eligibility, 276/277 claim status, 837 claims, 835 remittance/ERA, 278
+  authorization). API access is delivered through a partner/developer program at
+  developer.waystar.com; detailed endpoint specifications, sandbox credentials, and
+  authentication (HMAC-SHA256 / OAuth 2.0) are gated behind registration and a
+  signed partnership, so the API surface below is modeled from Waystar's public
+  product and developer-portal descriptions and the underlying X12 standards rather
+  than from a published OpenAPI definition.
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+tags:
+- Healthcare
+- Revenue Cycle Management
+- RCM
+- Clearinghouse
+- Healthcare Payments
+- Medical Billing
+- X12 EDI
+- Eligibility
+- Claims
+- Remittance
+created: '2026-07-04'
+modified: '2026-07-04'
+specificationVersion: '0.19'
+apis:
+- aid: waystar:waystar-eligibility-verification-api
+  name: Waystar Eligibility Verification API
+  tags:
+  - Eligibility
+  - Benefits
+  - X12 270/271
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://www.waystar.com/our-platform/financial-clearance/eligibility-verification/
+  properties:
+  - url: https://developer.waystar.com/
+    type: Documentation
+  - url: https://www.waystar.com/our-platform/financial-clearance/eligibility-verification/
+    type: SignUp
+  description: Real-time and batch insurance eligibility and benefits verification,
+    exchanging X12 270 inquiries and 271 responses to confirm coverage, plan
+    details, copays, deductibles, and service-type benefits before a visit.
+    Endpoints are modeled from Waystar's Eligibility product and the 270/271
+    transaction set; concrete paths are provisioned through the partner program.
+- aid: waystar:waystar-prior-authorization-api
+  name: Waystar Authorization & Referral API
+  tags:
+  - Prior Authorization
+  - Referrals
+  - X12 278
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://www.waystar.com/our-platform/financial-clearance/authorizations/
+  properties:
+  - url: https://developer.waystar.com/
+    type: Documentation
+  - url: https://www.waystar.com/our-platform/financial-clearance/authorization-referral-status/
+    type: Documentation
+  description: Automates prior authorization and referral determination and status,
+    modeled on the X12 278 health care services review request/response. Covers
+    submitting authorization requests, checking auth/referral status, and returning
+    determinations. Waystar layers RPA and payer-portal automation on top of EDI
+    where payers lack a transaction. Modeled from public product docs.
+- aid: waystar:waystar-patient-estimation-api
+  name: Waystar Patient Estimation API
+  tags:
+  - Patient Estimation
+  - Price Transparency
+  - Financial Clearance
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://www.waystar.com/our-platform/financial-clearance/coverage-detection/
+  properties:
+  - url: https://developer.waystar.com/
+    type: Documentation
+  description: Produces pre-service, good-faith patient cost estimates by combining
+    eligibility/benefit data, contracted rates, and procedure codes to support price
+    transparency and up-front patient collections. Modeled from Waystar's financial
+    clearance product; not backed by a published OpenAPI definition.
+- aid: waystar:waystar-claim-management-api
+  name: Waystar Claim Management API
+  tags:
+  - Claims
+  - Claim Submission
+  - X12 837
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://www.waystar.com/our-platform/claim-management/claim-manager/
+  properties:
+  - url: https://developer.waystar.com/
+    type: Documentation
+  - url: https://www.waystar.com/our-platform/claim-management/claim-manager/
+    type: Documentation
+  description: Submits, scrubs, edits, tracks, and manages professional,
+    institutional, and dental claims through Waystar's clearinghouse, modeled on the
+    X12 837P/837I/837D claim transaction set. Includes claim creation, validation
+    against payer edits, submission, and lifecycle management. Endpoints are modeled
+    from the Claim Manager product and 837 standard.
+- aid: waystar:waystar-claim-status-api
+  name: Waystar Claim Status API
+  tags:
+  - Claim Status
+  - X12 276/277
+  - Tracking
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://www.waystar.com/our-platform/claim-management/claim-monitoring/
+  properties:
+  - url: https://developer.waystar.com/
+    type: Documentation
+  description: Queries and monitors claim status across payers, modeled on the X12
+    276 status inquiry and 277 status response - returning received, accepted,
+    pending, denied, and paid states. Supports both real-time inquiry and automated
+    status monitoring. Modeled from Waystar's claim monitoring product.
+- aid: waystar:waystar-remittance-era-api
+  name: Waystar Remittance & ERA API
+  tags:
+  - Remittance
+  - ERA
+  - X12 835
+  - Payment Posting
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://www.waystar.com/our-platform/payment-management/remit-manager/
+  properties:
+  - url: https://developer.waystar.com/
+    type: Documentation
+  description: Retrieves electronic remittance advice (835/ERA), payments, and
+    adjustments for automated payment posting and reconciliation, with raw X12 835
+    artifacts and parsed JSON. Modeled on the X12 835 transaction and Waystar's
+    Remit Manager product; concrete endpoints are partner-provisioned.
+- aid: waystar:waystar-denial-management-api
+  name: Waystar Denial & Appeal Management API
+  tags:
+  - Denials
+  - Appeals
+  - Recovery
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://www.waystar.com/our-platform/denial-prevention-recovery/denial-recovery/
+  properties:
+  - url: https://developer.waystar.com/
+    type: Documentation
+  description: Identifies denied claims, exposes denial and remark codes and
+    explanation-of-benefits detail, and supports appeal creation, packaging, and
+    resubmission workflows. Modeled from Waystar's denial prevention and recovery
+    product; not backed by a published OpenAPI definition.
+common:
+- type: LinkedIn
+  url: https://www.linkedin.com/company/waystar
+- type: Website
+  url: https://www.waystar.com/
+- type: Documentation
+  url: https://developer.waystar.com/
+- type: SignUp
+  url: https://www.waystar.com/clients-partners/
+- type: Login
+  url: https://www.waystar.com/login/
+- type: Plans
+  url: plans/waystar-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/waystar-rate-limits.yml
+- type: FinOps
+  url: finops/waystar-finops.yml
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

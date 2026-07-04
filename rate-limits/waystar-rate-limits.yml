@@ -1,0 +1,65 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+provider: Waystar
+providerId: waystar
+created: '2026-07-04'
+modified: '2026-07-04'
+reconciled: false
+tags:
+- Healthcare
+- Revenue Cycle Management
+- Clearinghouse
+- X12 EDI
+- Rate Limiting
+- Quotas
+description: >-
+  Waystar does not publish public numeric rate limits for its APIs. As a
+  partner/client-gated clearinghouse, throughput, concurrency, and any
+  per-account throttles are governed by the client or partner contract and by
+  payer-side constraints on the underlying X12 transactions (eligibility,
+  status, claims, remits, authorizations). Real-time transactions and batch/sFTP
+  submission windows are provisioned per integration. Specific per-second or
+  per-day caps are not documented publicly.
+notes: >-
+  All values here are modeled/undisclosed. Confirm concrete real-time
+  concurrency, batch windows, and throttle behavior with Waystar during
+  partner onboarding. Payer availability windows and downstream payer limits
+  can bound effective throughput independent of Waystar's own limits.
+sources:
+- https://developer.waystar.com/
+- https://www.waystar.com/clients-partners/
+- https://www.waystar.com/
+responseCodes:
+  throttled: 429
+limits:
+- name: Real-Time API Requests
+  scope: account
+  metric: requests
+  limit: not published
+  notes: Real-time eligibility/status/auth transaction rates are contract- and payer-governed; no public numeric cap.
+- name: Real-Time Concurrency
+  scope: account
+  metric: concurrent
+  limit: not published
+  notes: Concurrent real-time transaction limits are provisioned per integration.
+- name: Batch / sFTP Submission
+  scope: account
+  metric: files
+  limit: contract-defined
+  notes: Batch claim and file exchange volumes/windows are set by the client agreement.
+- name: Payer-Side Availability
+  scope: payer
+  metric: availability
+  limit: payer-dependent
+  notes: Downstream payer maintenance windows and limits can bound effective throughput regardless of Waystar limits.
+policies:
+- name: Undisclosed Limits
+  description: Waystar does not publicly document numeric API rate limits; they are established per partner/client contract.
+- name: Backoff Strategy
+  description: Clients should implement exponential backoff with jitter and honor Retry-After on 429 responses.
+- name: Payer Windows
+  description: Real-time transactions may be constrained by payer availability windows outside Waystar's control.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

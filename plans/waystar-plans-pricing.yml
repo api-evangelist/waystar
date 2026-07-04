@@ -1,0 +1,96 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+provider: Waystar
+providerId: waystar
+created: '2026-07-04'
+modified: '2026-07-04'
+reconciled: false
+tags:
+- Healthcare
+- Revenue Cycle Management
+- RCM
+- Clearinghouse
+- Plans
+description: >-
+  Waystar does not publish public, self-service API pricing. It is an enterprise
+  healthcare RCM and clearinghouse vendor sold through sales and partnership
+  motions to providers, health systems, billing companies, and technology
+  partners. Pricing is quote-based and typically reflects some mix of platform
+  subscription plus per-transaction fees on clearinghouse volume (eligibility
+  checks, claims submitted, remits/ERAs, status inquiries, authorizations).
+  Exact figures are not disclosed publicly and are negotiated per contract.
+notes: >-
+  All plan detail here is modeled from Waystar's go-to-market model, not from a
+  published price sheet. To obtain API access and pricing, engage Waystar's
+  sales/partner team via waystar.com/clients-partners. Verify all terms during
+  reconciliation with an actual Waystar quote.
+sources:
+- https://www.waystar.com/
+- https://www.waystar.com/clients-partners/
+- https://developer.waystar.com/
+plans:
+- id: waystar-client-platform
+  name: Waystar Platform (Client)
+  type: enterprise
+  description: >-
+    Contracted access to the Waystar RCM platform and clearinghouse for
+    providers, health systems, and billing companies. Includes the financial
+    clearance, claim management, payment/remittance, and denial modules a client
+    licenses, with integration via REST APIs, web services, HL7, sFTP/batch, and
+    X12 EDI. Priced by quote; commonly a subscription plus per-transaction fees.
+  entries:
+  - label: Platform Agreement
+    name: platform_agreement
+    type: flat
+    metric: contract
+    limit: -1
+    timeFrame: year
+    geo: us
+    unit: 1
+    price: contact sales (quote-based)
+    userMultiplied: false
+  - label: Clearinghouse Transactions
+    name: clearinghouse_transactions
+    type: usage
+    metric: transactions
+    limit: -1
+    timeFrame: month
+    geo: us
+    unit: 1
+    price: per-transaction (negotiated; not public)
+    userMultiplied: false
+  elements:
+  - name: Eligibility Verification (270/271)
+  - name: Claim Management (837)
+  - name: Claim Status (276/277)
+  - name: Remittance / ERA (835)
+  - name: Prior Authorization (278)
+  - name: Denial Prevention & Recovery
+  - name: REST API / Web Services / HL7 / sFTP / X12 EDI Integration
+- id: waystar-technology-partner
+  name: Waystar Technology Partner
+  type: enterprise
+  description: >-
+    Partnership program for PM/HIS/EHR and technology vendors to embed Waystar
+    RCM capabilities via API. Grants developer-portal access, credentials, and
+    integration support under a signed partner agreement. Terms are negotiated.
+  entries:
+  - label: Partner Agreement
+    name: partner_agreement
+    type: flat
+    metric: contract
+    limit: -1
+    timeFrame: year
+    geo: us
+    unit: 1
+    price: contact sales (partnership terms)
+    userMultiplied: false
+  elements:
+  - name: Developer Portal Access
+  - name: API Credentials (HMAC / OAuth 2.0)
+  - name: Sandbox Environment
+  - name: Integration Support
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

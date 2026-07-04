@@ -1,0 +1,116 @@
+specification: FinOps Framework
+specificationVersion: '1.0'
+schema: https://www.finops.org/framework/
+provider: Waystar
+providerId: waystar
+created: '2026-07-04'
+modified: '2026-07-04'
+reconciled: false
+tags:
+- Healthcare
+- Revenue Cycle Management
+- Clearinghouse
+- X12 EDI
+- FinOps
+- Cost Management
+- FOCUS
+description: >-
+  FinOps view of Waystar spend. Waystar is an enterprise healthcare RCM and
+  clearinghouse platform billed through negotiated contracts rather than
+  public, usage-metered API pricing. Cost typically combines a platform
+  subscription with per-transaction clearinghouse fees on volume - eligibility
+  checks (270/271), claims submitted (837), claim status (276/277),
+  remittances/ERAs (835), and authorizations (278). Because pricing is
+  quote-based, the meters below are modeled to help a customer allocate and
+  forecast RCM spend, not derived from a published rate card.
+notes: >-
+  Per-unit rates are not public; reconcile against your Waystar contract and
+  invoices. Effective cost per transaction depends on negotiated volume tiers,
+  which modules are licensed, and payer mix.
+sources:
+- https://www.waystar.com/
+- https://www.waystar.com/clients-partners/
+- https://developer.waystar.com/
+- https://focus.finops.org/focus-specification/v1-3/
+alignedWith:
+  framework: FinOps Foundation Framework
+  frameworkUrl: https://www.finops.org/framework/
+  dataSpec: FOCUS
+  dataSpecVersion: '1.3'
+  dataSpecUrl: https://focus.finops.org/focus-specification/v1-3/
+publisherName: Waystar
+serviceCategory: Healthcare Revenue Cycle Management
+billingModel:
+  pricingCategory: Contract / Per-Transaction
+  billingFrequency: Monthly
+  billingCurrency: USD
+  chargeCategories:
+  - Purchase
+  - Usage
+  - Adjustment
+focusColumns:
+  ServiceName: Waystar Platform
+  ServiceCategory: Healthcare Revenue Cycle Management
+  ProviderName: Waystar
+  PublisherName: Waystar
+  InvoiceIssuerName: Waystar
+  BillingCurrency: USD
+  ChargeCategory: Usage
+  PricingCategory: Contract / Per-Transaction
+meters:
+- name: eligibility_transactions
+  description: Eligibility/benefit inquiries (X12 270/271) processed through the clearinghouse.
+  unit: transactions
+  aggregation: sum
+  dimensions:
+  - account
+  - payer
+  - provider
+- name: claim_transactions
+  description: Claims submitted (X12 837P/I/D) through the clearinghouse.
+  unit: claims
+  aggregation: sum
+  dimensions:
+  - account
+  - payer
+  - claim_type
+- name: claim_status_transactions
+  description: Claim status inquiries (X12 276/277).
+  unit: transactions
+  aggregation: sum
+  dimensions:
+  - account
+  - payer
+- name: remittance_transactions
+  description: Remittance advice / ERA (X12 835) retrieved and posted.
+  unit: transactions
+  aggregation: sum
+  dimensions:
+  - account
+  - payer
+- name: authorization_transactions
+  description: Prior authorization / referral reviews (X12 278) plus RPA-assisted authorizations.
+  unit: transactions
+  aggregation: sum
+  dimensions:
+  - account
+  - payer
+- name: platform_subscription
+  description: Recurring platform/module subscription independent of transaction volume.
+  unit: months
+  aggregation: sum
+  dimensions:
+  - account
+  - module
+principles:
+- name: Visibility
+  description: Track transaction counts by type (eligibility, claims, status, remits, auth) and by payer to see where clearinghouse fees accrue.
+- name: Allocation
+  description: Map transactions to provider/practice/team so RCM spend maps to internal cost centers and lines of business.
+- name: Optimization
+  description: Reduce avoidable transactions - cut denials and rework, batch where real-time is not required, and consolidate eligibility checks - to lower per-transaction spend.
+- name: Accountability
+  description: Assign owners per module and review monthly transaction volume and fees against the contracted tiers.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

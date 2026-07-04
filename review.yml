@@ -1,0 +1,112 @@
+aid: waystar
+name: Waystar
+review:
+  question: Does Waystar expose a documented public WebSocket API?
+  answer: false
+  date: '2026-07-04'
+  reviewer: API Evangelist
+  asyncapiSpecCreated: false
+  asyncapiScopeNote: |
+    No AsyncAPI document was authored. Waystar's programmatic surface is a
+    partner/client-gated set of REST APIs, web services, HL7, sFTP/batch, and
+    X12 EDI transactions (270/271, 276/277, 278, 837, 835). None of these is a
+    server-push WebSocket transport. Waystar's real-time model is
+    request/response transactions plus batch/sFTP file exchange, and event
+    delivery to clients is via callbacks/polling in RCM systems rather than a
+    documented wss:// stream. There is no public WebSocket surface to model, and
+    the detailed API specs are not publicly available in any case.
+findings:
+  summary: |
+    Waystar does not publish a documented public WebSocket API. Waystar is a
+    healthcare payments and revenue cycle management (RCM) company operating a
+    national clearinghouse. It offers programmatic integration through REST
+    APIs, web services, HL7, sFTP/batch, RPA (bots), and X12 EDI, described on a
+    developer portal at developer.waystar.com. That portal, its credentials
+    (HMAC-SHA256 and/or OAuth 2.0 per public descriptions), sandbox, and full
+    endpoint specifications are gated behind registration and a signed Waystar
+    partnership/client agreement - there is no open OpenAPI definition or public
+    endpoint reference. No realtime, bidirectional WebSocket (ws:// or wss://)
+    endpoint is documented anywhere in Waystar's public material.
+  accessModel: |
+    Partner/client gated. Access to Waystar's APIs requires becoming a Waystar
+    client or technology partner (waystar.com/clients-partners) and registering
+    on the developer portal. Because concrete endpoints, base URLs, and auth
+    detail are not public, the API surface in this repository is MODELED from
+    Waystar's public product and developer-portal descriptions and the
+    underlying X12 EDI standards - endpoints are marked endpointsModeled, not
+    endpointsConfirmed. Endpoint paths and base URLs were intentionally omitted
+    rather than fabricated.
+  x12Standards:
+    - transaction: 270/271
+      note: Eligibility and benefit inquiry / response.
+    - transaction: 276/277
+      note: Claim status inquiry / response.
+    - transaction: '278'
+      note: Health care services review - prior authorization / referral.
+    - transaction: 837P/837I/837D
+      note: Claims - professional, institutional, dental.
+    - transaction: '835'
+      note: Remittance advice / electronic remittance advice (ERA).
+  transports:
+    - protocol: REST
+      scheme: https
+      documented: gated
+      note: REST APIs / web services described on developer.waystar.com; specs behind partner login. Modeled here.
+    - protocol: X12 EDI
+      scheme: various
+      documented: gated
+      note: Standard HIPAA X12 transactions (270/271, 276/277, 278, 837, 835) over the clearinghouse.
+    - protocol: sFTP / Batch
+      scheme: sftp
+      documented: gated
+      note: Batch file exchange for claims and other volume transactions.
+    - protocol: HL7
+      scheme: various
+      documented: gated
+      note: HL7 feeds for eligibility and clinical/registration integration.
+    - protocol: WebSocket
+      scheme: wss
+      documented: false
+      note: No WebSocket endpoint is documented anywhere in Waystar's public material as of the review date.
+  endpointsModeled:
+    - Eligibility Verification API (X12 270/271) - modeled from the Eligibility product; no public path.
+    - Authorization & Referral API (X12 278) - modeled from the Authorizations product; no public path.
+    - Patient Estimation API - modeled from the financial clearance product; no public path.
+    - Claim Management API (X12 837P/I/D) - modeled from Claim Manager; no public path.
+    - Claim Status API (X12 276/277) - modeled from claim monitoring; no public path.
+    - Remittance & ERA API (X12 835) - modeled from Remit Manager; no public path.
+    - Denial & Appeal Management API - modeled from denial prevention & recovery; no public path.
+  endpointsConfirmed: []
+sources:
+  - url: https://developer.waystar.com/
+    type: Documentation
+    note: Waystar developer portal; registration/login required. Lists REST APIs, web services, sFTP, HL7, batch, X12 EDI, RPA; HMAC security and a Credential Management API. No open endpoint spec or WebSocket.
+  - url: https://www.waystar.com/
+    type: Website
+    note: Corporate site; healthcare payments and RCM platform overview.
+  - url: https://www.waystar.com/clients-partners/
+    type: SignUp
+    note: Partner/client program - the path to API access and credentials.
+  - url: https://www.waystar.com/our-platform/claim-management/claim-manager/
+    type: Documentation
+    note: Claim Manager / clearinghouse product; basis for the modeled 837 claim API.
+  - url: https://www.waystar.com/our-platform/financial-clearance/eligibility-verification/
+    type: Documentation
+    note: Eligibility product; basis for the modeled 270/271 API.
+  - url: https://www.waystar.com/our-platform/financial-clearance/authorizations/
+    type: Documentation
+    note: Authorizations product; basis for the modeled 278 API.
+  - url: https://www.waystar.com/our-platform/payment-management/remit-manager/
+    type: Documentation
+    note: Remit Manager; basis for the modeled 835/ERA API.
+actions:
+  asyncapiPath: null
+  apisYmlUpdated: true
+  reason: |
+    No WebSocket protocol surface exists, and Waystar's own programmatic surface
+    is gated request/response REST plus X12 EDI, HL7, and sFTP/batch. No
+    AsyncAPI document was created because there is no documented server-push
+    transport on Waystar's API to model, and the API is not publicly specified.
+    The apis.yml models seven logical APIs grounded in Waystar's public products
+    and the X12 standards, with endpoints marked as modeled rather than
+    confirmed.
