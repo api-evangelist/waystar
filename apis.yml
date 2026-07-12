@@ -147,6 +147,10 @@ apis:
     resubmission workflows. Modeled from Waystar's denial prevention and recovery
     product; not backed by a published OpenAPI definition.
 common:
+- type: VulnerabilityDisclosure
+  url: security/waystar-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/waystar-domain-security.yml
 - type: LinkedIn
   url: https://www.linkedin.com/company/waystar
 - type: Website
@@ -163,6 +167,8 @@ common:
   url: rate-limits/waystar-rate-limits.yml
 - type: FinOps
   url: finops/waystar-finops.yml
+- type: Blog
+  url: https://www.waystar.com/feed/
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
