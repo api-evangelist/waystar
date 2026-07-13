@@ -1,0 +1,13 @@
+{
+  "repo": "waystar",
+  "feeds": [
+    {
+      "source": "https://www.waystar.com/insights-resources/blog/",
+      "feed_url": "https://www.waystar.com/feed/",
+      "title": "Waystar",
+      "saved": 8
+    }
+  ],
+  "fetched": "2026-07-11T11:43:46Z",
+  "post_count": 14
+}
