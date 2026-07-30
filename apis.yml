@@ -15,7 +15,19 @@ description: Waystar is a healthcare payments and revenue cycle management (RCM)
   signed partnership, so the API surface below is modeled from Waystar's public
   product and developer-portal descriptions and the underlying X12 standards rather
   than from a published OpenAPI definition.
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: unknown
+  onboarding: unknown
+  trial: false
+  try_now: false
+  public: false
+  label: Unknown
+  confidence: low
+  source:
+  - plans
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/waystar.png
 tags:
 - Healthcare
 - Revenue Cycle Management
