@@ -10,11 +10,18 @@ description: Waystar is a healthcare payments and revenue cycle management (RCM)
   through REST APIs, web services, HL7, sFTP/batch, RPA, and X12 EDI transactions
   (270/271 eligibility, 276/277 claim status, 837 claims, 835 remittance/ERA, 278
   authorization). API access is delivered through a partner/developer program at
-  developer.waystar.com; detailed endpoint specifications, sandbox credentials, and
-  authentication (HMAC-SHA256 / OAuth 2.0) are gated behind registration and a
-  signed partnership, so the API surface below is modeled from Waystar's public
-  product and developer-portal descriptions and the underlying X12 standards rather
-  than from a published OpenAPI definition.
+  developer.waystar.com; the portal renders its full documentation navigation to
+  anyone but serves a login form in place of every document body, and sandbox
+  accounts are provisioned by email rather than self-service. Waystar publishes no
+  OpenAPI, no llms.txt, no MCP server, no agent card and no client SDK in any
+  package registry. Authentication is six hand-rolled schemes rather than one -
+  HMAC-SHA1 body signatures on the classic Developer Suite, HMAC-SHA256
+  Authorization headers on Patient Estimation, credentials in the POST body on the
+  eligibility gateway, HTTP Basic, WS-Security UsernameToken inside CAQH CORE SOAP
+  envelopes, and X.509 client certificates - with no OAuth 2.0 and no OpenID
+  Connect anywhere. The API surface below is documented from Waystar's public
+  product pages, its developer-portal structure and the underlying X12 standards
+  rather than from a published machine-readable definition.
 accessModel:
   pricing: unknown
   onboarding: unknown
@@ -40,8 +47,21 @@ tags:
 - Claims
 - Remittance
 created: '2026-07-04'
-modified: '2026-07-04'
+modified: '2026-08-15'
 specificationVersion: '0.19'
+x-base-url-provenance: >-
+  The baseURL on each API entry is the documented Waystar API host for that
+  product, read from the Waystar developer portal and recorded in
+  authentication/waystar-authentication.yml and
+  conventions/waystar-conventions.yml. Several sit on zirmed.com rather than
+  waystar.com: ZirMed is Waystar's own legacy brand - Waystar was formed from the
+  2017 Navicure/ZirMed merger - and both zirmed.com and www.zirmed.com 301 to
+  https://www.waystar.com/. Every host was verified on 2026-08-15 to resolve
+  inside Waystar's contiguous 69.2.x.x netblock and to answer HTTP.
+  api.waystar.com is deliberately NOT used as a base: it answers every path with
+  a 403 edge challenge and is not a documented API host. The Denial & Appeal
+  Management API carries no baseURL because Waystar documents no host for it -
+  an honest gap rather than a guess.
 apis:
 - aid: waystar:waystar-eligibility-verification-api
   name: Waystar Eligibility Verification API
@@ -51,9 +71,12 @@ apis:
   - X12 270/271
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://www.waystar.com/our-platform/financial-clearance/eligibility-verification/
+  baseURL: https://eligibilityapi.zirmed.com/1.0/
   properties:
   - url: https://developer.waystar.com/
     type: Documentation
+  - url: authentication/waystar-authentication.yml
+    type: Authentication
   - url: https://www.waystar.com/our-platform/financial-clearance/eligibility-verification/
     type: SignUp
   description: Real-time and batch insurance eligibility and benefits verification,
@@ -69,6 +92,7 @@ apis:
   - X12 278
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://www.waystar.com/our-platform/financial-clearance/authorizations/
+  baseURL: https://priorauthorizationapi.waystar.com/1.0/
   properties:
   - url: https://developer.waystar.com/
     type: Documentation
@@ -87,6 +111,7 @@ apis:
   - Financial Clearance
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://www.waystar.com/our-platform/financial-clearance/coverage-detection/
+  baseURL: https://estimationapi.zirmed.com/1.0/
   properties:
   - url: https://developer.waystar.com/
     type: Documentation
@@ -102,6 +127,7 @@ apis:
   - X12 837
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://www.waystar.com/our-platform/claim-management/claim-manager/
+  baseURL: https://claimsapi.zirmed.com/
   properties:
   - url: https://developer.waystar.com/
     type: Documentation
@@ -120,6 +146,7 @@ apis:
   - Tracking
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://www.waystar.com/our-platform/claim-management/claim-monitoring/
+  baseURL: https://claimsapi.zirmed.com/
   properties:
   - url: https://developer.waystar.com/
     type: Documentation
@@ -136,6 +163,7 @@ apis:
   - Payment Posting
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://www.waystar.com/our-platform/payment-management/remit-manager/
+  baseURL: https://remitsapi.waystar.com/
   properties:
   - url: https://developer.waystar.com/
     type: Documentation
@@ -159,28 +187,73 @@ apis:
     resubmission workflows. Modeled from Waystar's denial prevention and recovery
     product; not backed by a published OpenAPI definition.
 common:
-- type: VulnerabilityDisclosure
-  url: security/waystar-vulnerability-disclosure.yml
-- type: DomainSecurity
-  url: security/waystar-domain-security.yml
 - type: LinkedIn
   url: https://www.linkedin.com/company/waystar
 - type: Website
   url: https://www.waystar.com/
+- type: DeveloperPortal
+  url: https://developer.waystar.com/
 - type: Documentation
   url: https://developer.waystar.com/
+- type: APIReference
+  url: https://developer.waystar.com/documents/
+- type: GettingStarted
+  url: https://developer.waystar.com/documents/integration-basics/
+- type: Support
+  url: https://www.waystar.com/support/
+- type: GitHubOrganization
+  url: https://github.com/WaystarInc
 - type: SignUp
   url: https://www.waystar.com/clients-partners/
 - type: Login
   url: https://www.waystar.com/login/
+- type: TermsOfService
+  url: https://www.waystar.com/terms/
+- type: PrivacyPolicy
+  url: https://www.waystar.com/privacy-policy/
+- type: Blog
+  url: https://www.waystar.com/blog/
+- type: BlogRSS
+  url: https://www.waystar.com/feed/
+- type: StatusPage
+  url: http://status.esolutionsinc.com/
+- type: Security
+  url: https://www.waystar.com/responsible-disclosure/
+- type: VulnerabilityDisclosure
+  url: security/waystar-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/waystar-domain-security.yml
+- type: Authentication
+  url: authentication/waystar-authentication.yml
+- type: Conventions
+  url: conventions/waystar-conventions.yml
+- type: Idempotency
+  url: conventions/waystar-conventions.yml
+- type: ErrorCatalog
+  url: errors/waystar-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/waystar-lifecycle.yml
+- type: Conformance
+  url: conformance/waystar-conformance.yml
+- type: Sandbox
+  url: sandbox/waystar-sandbox.yml
+- type: DataModel
+  url: data-model/waystar-data-model.yml
+- type: Packages
+  url: packages/waystar-packages.yml
+- type: LLMsTxt
+  url: llms/waystar-llms.txt
 - type: Plans
   url: plans/waystar-plans-pricing.yml
 - type: RateLimits
   url: rate-limits/waystar-rate-limits.yml
 - type: FinOps
   url: finops/waystar-finops.yml
-- type: Blog
-  url: https://www.waystar.com/feed/
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
+x-enrichment:
+  date: '2026-08-15'
+  status: enriched
+  artifacts_added: 4
+  pass: local-v1
