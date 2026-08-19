@@ -1,0 +1,206 @@
+generated: '2026-08-14'
+method: searched
+source: https://developer.waystar.com/documents/integration-basics/
+provider: Waystar
+providerId: waystar
+description: >-
+  Cross-cutting request/response semantics for the Waystar API surface, read from
+  the Waystar developer portal. Waystar is not a single REST API - it is a set of
+  product APIs built in different eras on different styles (form-POST + HMAC
+  signature, CAQH CORE SOAP, and a newer JSON/REST layer), all of them wrapping
+  X12 EDI transactions. The conventions below are what an integrator actually has
+  to hold in their head; they differ per surface and this file records those
+  differences rather than flattening them.
+authentication:
+  style: per-surface - see authentication/waystar-authentication.yml
+  summary: >-
+    HMAC-SHA1 body signature (classic Developer Suite), HMAC-SHA256 Authorization
+    header (Estimation), UserID/Password form fields (Eligibility REST), HTTP
+    Basic (Credential Management, Prior Authorization), WS-Security UsernameToken
+    (SOAP claims/claim status), X.509 client cert (Eligibility SOAP), SAML 2.0
+    (portal SSO).
+  ref: authentication/waystar-authentication.yml
+idempotency:
+  supported: true
+  mechanism: signature-and-content-deduplication
+  scope: Patient Estimation API (estimationapi.zirmed.com/1.0)
+  window: 30 seconds
+  rule: >-
+    "Duplicate POSTs within a 30 second window will be ignored (identical HMAC
+    signature and content)." Because the HMAC signature is computed over the
+    method, lowercased URI, UTC Date, CustID and Base64 body, an identical retry
+    inside the window is collapsed by Waystar rather than creating a second
+    estimate. This is content-addressed idempotency - there is no client-supplied
+    Idempotency-Key header.
+  replay_protection:
+    mechanism: timestamp-window
+    window: '+/- 30 seconds from current UTC'
+    rule: >-
+      "POST requests must have a UTC DateTime stamp +/- 30 seconds from current
+      UTC time to be valid." The Date header (RFC 1123) is part of the signed
+      representation, so a replayed request outside the window fails signature
+      validation.
+    also_applies_to: >-
+      The classic Developer Suite calls carry a TS parameter (UTC timestamp,
+      MM/DD/CCYY HH:MI:SS PM) that is folded into the HMAC signature and is
+      REQUIRED on the newer URIs - the same replay-protection role.
+  caveats: >-
+    Idempotency is NOT uniform. The ZPay transaction endpoints, the eligibility
+    gateway and the claim intake endpoints publish no deduplication window; a
+    retried claim submission or card debit is a NEW transaction. Treat only the
+    Estimation POST as safely retryable, and use ZPay's Transaction/Status call
+    before any payment retry.
+  header: null
+  source: https://developer.waystar.com/documents/patient-access/patient-estimation/
+async_pattern:
+  style: post-then-poll
+  description: >-
+    Waystar's two newest REST surfaces both use submit-then-poll rather than a
+    synchronous response, because the real work happens at the payer.
+  flows:
+  - api: Patient Estimation
+    submit: POST /estimate -> returns the Estimate ID
+    poll: GET /estimate/{estimateid}
+    completion_field: EligibilityStatus
+    completion_values: [Active Coverage, Inactive Coverage, Pending, Error]
+    secondary_field: EstimateStatus
+    secondary_values: [Complete, Incomplete]
+    typical_latency: 10-16 seconds
+  - api: Prior Authorization
+    submit: POST /1.0/Rest/Request/Submit -> acknowledgement, no interim 278 payload
+    poll: GET /1.0/Rest/Request/Status
+    completion_note: >-
+      Status "Waiting Response" means still processing. "Not Found" can be a FINAL
+      status - Waystar could not locate the authorization - and requires a fresh
+      278x215 submission to re-check later, not a longer poll.
+  - api: Eligibility (REST gateway)
+    style: synchronous
+    note: >-
+      GatewayAsync.ashx is named async but returns the payer response on the same
+      request; the asynchrony is internal.
+pagination:
+  supported: false
+  note: >-
+    No cursor or offset pagination is documented on any Waystar surface. Bulk
+    retrieval is done through SFTP file download directories, not paged API
+    reads. Claim history returns the full matched set for the supplied CustID and
+    query parameters.
+versioning:
+  scheme: uri-path
+  note: >-
+    Versions appear as a path segment near the host root - /1.0/ on eligibility,
+    estimation, ZPay, prior authorization and credential management;
+    claimsapi.zirmed.com carries both /1.0/ and a /2.0/v1/ path
+    (/2.0/v1/History/GetClaimHistory). A Version=1.0 query parameter is also used
+    on the legacy ServiceHandler surface. There is no version header and no
+    date-based version train.
+  current:
+    eligibility: '1.0'
+    estimation: '1.0'
+    zpay: '1.0'
+    prior_authorization: '1.0'
+    credential_management: '1.0'
+    claim_history: 2.0/v1
+    legacy_service_handler: '1.0'
+content_negotiation:
+  request_formats: [X12 EDI, Waystar SF1 simplified format, JSON, XML, CSV, HL7 v2.3 ADT, SOAP]
+  response_formats: [HTML, TEXT, X12 271, JSON, FullJSON, X12definedXML, XML, PDF stream, CSV]
+  mechanism: >-
+    Format is selected by request PARAMETER, not by an Accept header. The
+    eligibility gateway takes DataFormat (X12 | SF1) for the inbound payload and
+    ResponseType (HTML | TEXT | 271 | JSON | FullJSON | X12definedXML) for the
+    outbound. HTML is the default response type.
+  guidance: >-
+    Waystar explicitly warns that the HTML and TEXT responses are cosmetic and
+    subject to change without notice - "if you need to extract data from a
+    Waystar response, we recommend you use the 271 Response for that purpose."
+    Machine consumers should request 271, FullJSON or X12definedXML. This is the
+    single most important convention on the eligibility surface.
+error_envelope:
+  uniform: false
+  shapes:
+  - surface: Eligibility REST gateway
+    shape: >-
+      Errors default to HTML format even when X12 was requested. Waystar advises
+      verifying the presence of the X12 envelope structure as the first step on
+      receipt. "Failed at Payer", payer timeouts and "Failed at Waystar" return
+      X12 carrying the detail.
+  - surface: Claim status 276/277 SOAP
+    shape: Named error scenario + human-readable error message inside the 277/SOAP response.
+  - surface: ZPay
+    shape: '<response><code id="NNN" status="XX" description="..."/></response>; EPIC variant returns e_status / e_message key-value pairs.'
+  - surface: Estimation
+    shape: StatusMessage on the response for EligibilityStatus=Error; an <Errors><Error>..</Error></Errors> element when EstimateStatus=Incomplete.
+  - surface: Credential Management
+    shape: Prose success/error strings; 500 on an uncaught validation failure.
+  rfc9457: false
+  ref: errors/waystar-problem-types.yml
+identifiers:
+  primary: CustID
+  description: >-
+    Hierarchical Waystar customer identifier - one per client and one per
+    facility/site, groupable under the client. Every signed call carries it, the
+    HMAC key is bound to it, and a token created under one CustID cannot be used
+    under another.
+  others:
+  - name: PayerID
+    note: Waystar Payer ID from the Payer ID List; SELF is reserved for self-pay. Self00 is the convention for Coverage Detection tracking.
+  - name: zirmedclaimid / zirmedinstanceid
+    note: Claim and claim-instance identifiers surfaced in claim history and PDF linkback URLs.
+  - name: Token
+    note: GUID payment token scoped to a single CustID; can expire.
+  - name: EstimateID
+    note: Returned by POST /estimate and used to poll and to fetch the PDF summary.
+  - name: InquiryId
+    note: Eligibility inquiry identifier returned in the JSON envelope.
+rate_limit_signaling:
+  headers: none-published
+  note: >-
+    Waystar publishes no RateLimit-* or Retry-After headers and no numeric
+    per-second caps. The one hard published cap is a request-size limit -
+    ImmediateClaims rejects any submission of more than 50 claims. See
+    rate-limits/waystar-rate-limits.yml.
+  ref: rate-limits/waystar-rate-limits.yml
+tracing:
+  request_id_header: none
+  note: >-
+    No request-id header is documented. Correlation is done with domain
+    identifiers instead - TransID and RequestID on the signed calls, TracingNumber
+    (the batch id) returned by ImmediateClaims, InquiryId on eligibility, and the
+    X12 TRN segment inside the EDI payloads themselves.
+file_services:
+  transport: SFTP
+  host: sshftp.waystar.com
+  directories: [upload, download]
+  convention: >-
+    Routing is by FILE EXTENSION, not by directory or metadata - the extension IS
+    the API. .CLP professional claims, .CLI institutional claims, .CLD dental,
+    .ELG eligibility, .EST estimation, .COV coverage detection, .PS print
+    services, .PLB EOB image / BAI upload, .835 remittance, .276 batch claim
+    status, .PAT patient center, .HL7 patient center ADT, .POP Waystar program
+    management. A period must not appear in the filename before the extension.
+  response_naming: '[CustID].[FileCreateDate CCYYMMDD].[FileCreateTime 24HHMMSSNNN].CL[P/I].277.txt'
+  schedule: >-
+    277U response files are written to the download directory at midnight Eastern
+    on each day the account had claim activity; Waystar recommends polling the
+    download directory at the start of the work day.
+  lockout: 5 consecutive failed connection attempts blacklists the source IP.
+standards_alignment:
+  caqh_core: >-
+    The eligibility MIME endpoint implements CAQH CORE Phase II Connectivity Rule
+    envelope standard A; the SOAP endpoints implement envelope standard B
+    (CORERule2.2.0). The claim status SOAP endpoint uses
+    COREEnvelopeRealTimeRequest / COREEnvelopeRealTimeResponse with PayloadType
+    X12_276_Request_005010X212 and X12_277_Response_005010X212.
+  x12: 005010 HIPAA transaction sets - 270/271, 276/277, 278 (x215 and x217), 837P/I/D, 835
+  ref: conformance/waystar-conformance.yml
+cross_references:
+  errors: errors/waystar-problem-types.yml
+  lifecycle: lifecycle/waystar-lifecycle.yml
+  authentication: authentication/waystar-authentication.yml
+  rate_limits: rate-limits/waystar-rate-limits.yml
+  sandbox: sandbox/waystar-sandbox.yml
+  data_model: data-model/waystar-data-model.yml
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

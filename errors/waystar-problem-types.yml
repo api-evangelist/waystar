@@ -1,0 +1,175 @@
+generated: '2026-08-14'
+method: searched
+source: https://developer.waystar.com/documents/
+provider: Waystar
+providerId: waystar
+format: vendor-specific
+rfc9457: false
+description: >-
+  Error catalog for the Waystar API surface, read from the Waystar developer
+  portal error tables. Waystar publishes no RFC 9457 problem+json envelope and
+  no uniform error schema - each product API returns its own shape, and several
+  return the error inside the X12 payload rather than at the HTTP layer. That is
+  itself the finding an agent needs: on the eligibility surface an HTTP 200 with
+  an HTML body can be a failure.
+envelope_shapes:
+- surface: Eligibility REST gateway
+  shape: >-
+    Error responses default to HTML regardless of the requested ResponseType.
+    When ResponseType=271, verify the X12 envelope structure (ISA/GS/ST) is
+    present as the FIRST step on receipt - its absence is the error signal.
+  transport_status: 200 (errors are in-band, not at the HTTP layer)
+- surface: Claim status 276/277 (SOAP)
+  shape: Named error scenario + human-readable message returned in the CORE SOAP response.
+- surface: ZPay payments
+  shape: '<response><code id="NNN" status="XX" description="TEXT"/></response>'
+  epic_variant: 'key=value pairs: e_status=approved|declined|error, e_message=<reason>'
+- surface: Patient Estimation
+  shape: StatusMessage (EligibilityStatus=Error) or <Errors><Error>text</Error></Errors> (EstimateStatus=Incomplete)
+- surface: Credential Management API
+  shape: Prose success/error strings; HTTP 500 for a validation failure Waystar did not catch.
+- surface: HMAC-signed Developer Suite calls
+  shape: HTTP 401 Not Authorized on signature mismatch; the call is not processed further.
+problems:
+- surface: eligibility
+  title: Authentication Failure
+  cause: Bad username, password, or both; or invalid key/value pairings in the POST.
+  remediation: Check the RealTime API UserID and Password. Validate every key/value pair name.
+  source_doc: https://developer.waystar.com/documents/patient-access/insurance-verification/
+- surface: eligibility
+  title: "'Data' is not valid. Please review the X12/Simple File and resubmit"
+  cause: Invalid formatting or content in the X12 270 or SF1 payload.
+  remediation: Verify format and data content, with specific attention to delimiting characters.
+  source_doc: https://developer.waystar.com/documents/patient-access/insurance-verification/
+- surface: eligibility
+  title: 'The system encountered a processing error. The error was: <message>'
+  cause: Rare internal processing error.
+  remediation: Consult Waystar support with the specific transaction details.
+  source_doc: https://developer.waystar.com/documents/patient-access/insurance-verification/
+- surface: eligibility
+  title: Payer <payername> (<payerid>) is not setup for eligibility.
+  cause: The requested payer does not support the eligibility transaction.
+  remediation: Consult the Waystar Payer ID List for payer eligibility support.
+  source_doc: https://developer.waystar.com/documents/integration-basics/payer-id-list/
+- surface: eligibility
+  title: Failed at Payer / Payer timeout / Failed at Waystar
+  cause: >-
+    Downstream payer rejected, timed out, or Waystar could not complete the
+    round trip.
+  remediation: >-
+    Request ResponseType=271; the returned X12 carries the specific issue detail.
+    Retry against payer availability windows.
+  source_doc: https://developer.waystar.com/documents/patient-access/insurance-verification/
+- surface: claim-status-276-277
+  code: Format Error
+  title: The request is not in a recognized format. Please review and resubmit. For assistance, contact Waystar client support
+  cause: Waystar is unable to authenticate the API call or process the SOAP XML.
+  remediation: Validate the WS-Security UsernameToken and the CORE SOAP envelope; XML element names are case sensitive.
+  source_doc: https://developer.waystar.com/documents/claim-and-denial-management/claim-management-2/
+- surface: claim-status-276-277
+  code: Feature Inactive
+  title: The feature you are attempting to use is not currently active for this account. For assistance, please contact Waystar client support
+  cause: The account or API user is not enabled for the real-time 276/277 EDI feature.
+  remediation: >-
+    Entitlement issue, not a payload issue. The account must be contracted for
+    Waystar Claim Monitoring. Do not retry.
+  source_doc: https://developer.waystar.com/documents/claim-and-denial-management/claim-management-2/
+- surface: claim-status-276-277
+  code: 276 Parser Error
+  title: The 276 request could not be processed. Please review and resubmit. For assistance, contact Waystar client support
+  cause: Waystar is unable to parse the 276 payload.
+  remediation: Validate the 276 against 005010X212 before resubmitting.
+  source_doc: https://developer.waystar.com/documents/claim-and-denial-management/claim-management-2/
+- surface: claim-status-276-277
+  code: Payer Inactive
+  title: The destination payer is not available for EDI claim statusing
+  cause: The payer is not available for real-time EDI status checks.
+  remediation: >-
+    Fall back to Waystar Claim Monitoring scheduling or RPA-assisted status,
+    which cover payers with no 276/277 transaction.
+  source_doc: https://developer.waystar.com/documents/claim-and-denial-management/claim-management-2/
+- surface: claim-status-276-277
+  code: Claim Not Found
+  title: No claim was found matching the 276 request. Please review and resubmit. For assistance, contact Waystar client support
+  cause: >-
+    The claim was never submitted to Waystar, or the request did not match an
+    existing claim under the submitting account.
+  remediation: Confirm the claim was submitted under the same CustID before re-querying.
+  source_doc: https://developer.waystar.com/documents/claim-and-denial-management/claim-management-2/
+- surface: claims-immediate-837
+  code: Invalid request. Too many claims.
+  title: Invalid request. Too many claims.
+  cause: More than 50 claims in a single ImmediateClaims submission.
+  remediation: Chunk submissions to 50 claims or fewer. Published limit as of 08/01/2019.
+  source_doc: https://developer.waystar.com/documents/claim-and-denial-management/claim-management/
+- surface: hmac-signed-calls
+  status: 401
+  title: 401 Not Authorized
+  cause: >-
+    The recomputed HMAC hash did not exactly match the Signature value supplied
+    on the call.
+  remediation: >-
+    Re-check canonicalization - sort non-empty pairs case-insensitively,
+    concatenate with the "&" and "=" delimiters removed, HMAC-SHA1 with the
+    client HMAC key, Base64 encode. Confirm the TS parameter is present on the
+    newer URIs.
+  source_doc: https://developer.waystar.com/documents/integration-basics/hmac-security-for-web-services-api-information/
+- surface: credential-management
+  title: The password did not meet requirements
+  cause: The RealTime user has the correct permission but the supplied password failed validation.
+  remediation: Supply a password meeting Waystar's password requirements.
+  source_doc: https://developer.waystar.com/documents/integration-basics/credential-management-api/
+- surface: credential-management
+  title: 'user <username> does not have permissions to this function'
+  cause: >-
+    The RealTime API user lacks the required permission (e.g. "Allow FTP
+    Whitelisting" for an FTP password rotation) or lacks access to the supplied
+    CustId.
+  remediation: Request a permission update on the RealTime API user from Waystar.
+  source_doc: https://developer.waystar.com/documents/integration-basics/credential-management-api/
+- surface: credential-management
+  status: 500
+  title: 500 error
+  cause: The supplied password produced an error not caught by Waystar validation.
+  remediation: Try a different password; contact Waystar support if it recurs.
+  source_doc: https://developer.waystar.com/documents/integration-basics/credential-management-api/
+- surface: zpay
+  code: '222'
+  status_token: ZM
+  title: Invalid token
+  cause: The supplied payment token is unknown, expired, or belongs to a different CustID.
+  remediation: >-
+    Tokens are scoped to the CustID that created them and can expire. Create a
+    new token.
+  source_doc: https://developer.waystar.com/documents/payment-management/patient-payments/
+- surface: estimation
+  title: EstimateStatus=Incomplete with <Errors> detail
+  cause: >-
+    Waystar could not complete the estimate from the benefits returned, e.g.
+    "INDIVIDUAL DEDUCTIBLE MET COULD NOT BE DETERMINED FROM BENEFITS".
+  remediation: >-
+    Inspect the Errors element. This is a data-sufficiency outcome, not a
+    transport failure - retrying the identical request inside 30 seconds is
+    deduplicated and will not help.
+  source_doc: https://developer.waystar.com/documents/patient-access/patient-estimation/
+domain_error_registries:
+  note: >-
+    Beyond the API-layer errors above, the substantive error semantics of the
+    Waystar surface live in the X12 standard code sets it carries, not in
+    Waystar's own catalog. Agents parsing Waystar responses must handle these.
+  registries:
+  - name: X12 277 Claim Status Category Codes + Claim Status Codes (STC segment)
+    note: >-
+      Waystar also places a "disposition status" string inside the STC 12 error
+      message field of the 277, in addition to standard status/category codes.
+      Waystar advises "String contains" matching on STC 12 to use it.
+  - name: X12 835 Claim Adjustment Reason Codes (CARC) and Remittance Advice Remark Codes (RARC)
+    note: Surfaced through Remit Management and Denial and Appeal Management.
+  - name: X12 271 EB segment eligibility/benefit codes
+    note: >-
+      Waystar's X12definedXML ResponseType exists specifically so a consumer does
+      not need to interpret these; FullJSON still requires 271 literacy.
+  - name: X12 278 (x215 / x217) health care services review response codes
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

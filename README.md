@@ -50,11 +50,13 @@ Waystar is a healthcare payments and revenue cycle management (RCM) software com
 
 Waystar operates a developer portal at [developer.waystar.com](https://developer.waystar.com/), and its public material describes integration via "REST APIs, web services, sFTP, HL7, batch, X12 EDI, RPA (bot)" along with "HMAC Security for Web Services / API Information" and a "Credential Management API." However:
 
-- **No public OpenAPI definition or open endpoint reference is published.** Full API specifications, base URLs, sandbox credentials, and authentication detail (HMAC-SHA256 and/or OAuth 2.0) sit behind developer-portal registration and a signed Waystar partnership/client agreement.
-- The APIs documented in this repository are therefore **modeled** from Waystar's public product pages, developer-portal descriptions, and the underlying **X12 EDI standards** — not confirmed from a published machine-readable spec. Endpoint paths and base URLs are intentionally omitted rather than fabricated.
-- Access is obtained by becoming a Waystar client or technology partner via [waystar.com/clients-partners](https://www.waystar.com/clients-partners/).
+- **No public OpenAPI definition is published.** `/openapi.json`, `/openapi.yaml`, `/swagger.json`, `/api-docs` and `/llms.txt` return 404 on `developer.waystar.com`, `www.waystar.com` and on every documented Waystar/ZirMed API host. There is no MCP server, no A2A agent card, no `/.well-known/` document, and no client SDK in npm, PyPI, RubyGems, NuGet, crates.io, Packagist or Maven Central.
+- **The developer portal renders its full documentation navigation publicly but serves a login form in place of every document body.** Specifications exist as PDF companion guides behind that login.
+- **Authentication is six hand-rolled schemes, not one** — HMAC-SHA1 body signature, HMAC-SHA256 `Authorization` header, credentials in the POST body, HTTP Basic, WS-Security UsernameToken inside CAQH CORE SOAP, and X.509 client certificates — with **no OAuth 2.0 and no OpenID Connect**. See [`authentication/`](authentication/waystar-authentication.yml).
+- **Base URLs are now recorded** for six of the seven APIs. They are Waystar's documented product hosts; several sit on `zirmed.com`, Waystar's own legacy brand (both `zirmed.com` and `www.zirmed.com` 301 to `waystar.com`). Every host was verified to resolve inside Waystar's contiguous `69.2.x.x` netblock. The Denial & Appeal Management API has none because Waystar documents none.
+- Access is obtained by becoming a Waystar client or technology partner via [waystar.com/clients-partners](https://www.waystar.com/clients-partners/). Sandbox accounts are provisioned by email, not self-service.
 
-This is an **honest gated stub**: the provider is real and does expose programmatic integration, but the concrete API surface is not publicly documented.
+This is an **honest gated profile**: the provider is real and exposes substantial programmatic integration, but the concrete contract is not published in machine-readable form.
 
 ## X12 EDI Transaction Coverage
 
@@ -130,14 +132,24 @@ Identify denials, expose denial/remark codes and EOB detail, and support appeal 
 
 ## Common Properties
 
-- [LinkedIn](https://www.linkedin.com/company/waystar)
-- [Website](https://www.waystar.com/)
-- [Documentation](https://developer.waystar.com/)
-- [Sign Up / Partners](https://www.waystar.com/clients-partners/)
-- [Login](https://www.waystar.com/login/)
-- [Plans](plans/waystar-plans-pricing.yml)
-- [Rate Limits](rate-limits/waystar-rate-limits.yml)
-- [Fin Ops](finops/waystar-finops.yml)
+**Waystar pages**
+
+- [Website](https://www.waystar.com/) · [LinkedIn](https://www.linkedin.com/company/waystar) · [Blog](https://www.waystar.com/blog/)
+- [Developer portal](https://developer.waystar.com/) · [API reference index](https://developer.waystar.com/documents/) · [Integration basics](https://developer.waystar.com/documents/integration-basics/)
+- [Clients & partners (sign up)](https://www.waystar.com/clients-partners/) · [Login](https://www.waystar.com/login/) · [Support](https://www.waystar.com/support/)
+- [Terms and conditions](https://www.waystar.com/terms/) · [Privacy policy](https://www.waystar.com/privacy-policy/) · [Responsible disclosure](https://www.waystar.com/responsible-disclosure/)
+- [GitHub organization](https://github.com/WaystarInc) — two forked CI/CD example repos, last pushed 2023, no API artifacts
+- [Status page](http://status.esolutionsinc.com/) — a first-party Pingdom uptime dashboard on the Waystar-owned `esolutionsinc.com` domain. **HTTP only**, unlinked from every Waystar property, and it does not monitor the newer API hosts.
+
+**Artifacts in this repository**
+
+- [Authentication](authentication/waystar-authentication.yml) · [Conventions / idempotency](conventions/waystar-conventions.yml) · [Error catalog](errors/waystar-problem-types.yml)
+- [Lifecycle](lifecycle/waystar-lifecycle.yml) · [Conformance](conformance/waystar-conformance.yml) · [Sandbox](sandbox/waystar-sandbox.yml) · [Data model](data-model/waystar-data-model.yml)
+- [Packages](packages/waystar-packages.yml) · [MCP](mcp/waystar-mcp.yml) · [llms.txt](llms/waystar-llms.txt) · [Well-known probe](well-known/waystar-well-known.yml)
+- [Plans](plans/waystar-plans-pricing.yml) · [Rate limits](rate-limits/waystar-rate-limits.yml) · [Fin Ops](finops/waystar-finops.yml)
+- [Domain security](security/waystar-domain-security.yml) · [Vulnerability disclosure](security/waystar-vulnerability-disclosure.yml)
+
+**Deliberately absent** — no `Compliance`, `TrustCenter`, `WellKnown`, `SecurityTxt`, `MCPServer`, `AgentCard`, `AgentSkill`, `SDKs`, `Deprecation`, `Pricing`, `Roadmap` or `Postman` pointer is emitted, because Waystar publishes none of them. The certifications Waystar claims (HIPAA, PCI DSS, SSAE 16, EHNAC, GLBA) sit behind the developer-portal login, so they are recorded in `conformance/` but not asserted as published.
 
 ## Maintainers
 

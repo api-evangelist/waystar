@@ -1,0 +1,107 @@
+generated: '2026-08-15'
+method: searched
+source: >-
+  registry.npmjs.org search + package metadata, pypi.org, rubygems.org,
+  azuresearch-usnc.nuget.org, crates.io, packagist.org, api.github.com org and
+  repo search, and the Waystar developer portal navigation
+provider: Waystar
+providerId: waystar
+description: >-
+  Waystar publishes NO first-party client libraries. Every public package
+  registry was queried by name and none returns a Waystar-authored SDK; the
+  Waystar developer portal has no SDK, download or code-sample section in its
+  navigation; and Waystar's own GitHub organization contains two forked vendor
+  example repositories and no client library. Integration is done by hand against
+  form-POST, SOAP and JSON endpoints with a client-computed HMAC signature - the
+  signature canonicalization documented in
+  authentication/waystar-authentication.yml is exactly the kind of work an SDK
+  normally removes, and every Waystar integrator writes it themselves.
+official_count: 0
+sdk_pointer_emitted: false
+sdk_pointer_note: >-
+  No type SDKs pointer is emitted in apis.yml. Zero first-party client libraries
+  exist, so asserting one would credit Waystar with an ergonomics surface it does
+  not ship.
+packages: []
+third_party:
+- language: typescript
+  registry: npm
+  name: '@velocity-bpa/n8n-nodes-waystar'
+  url: https://www.npmjs.com/package/@velocity-bpa/n8n-nodes-waystar
+  install: npm install @velocity-bpa/n8n-nodes-waystar
+  repository: https://github.com/velocity-bpa/n8n-nodes-waystar
+  official: false
+  version: 1.0.0
+  published: '2026-04-25'
+  author: Velocity BPA (support@velocity-bpa.com)
+  description: >-
+    n8n community node for Waystar healthcare revenue cycle management. A
+    workflow-automation connector authored by a third-party integrator, not by
+    Waystar. Recorded because it is the only published code artifact of any kind
+    that targets the Waystar API, and because a single 1.0.0 release with no
+    follow-up is itself a signal about how much public integration activity this
+    surface sustains.
+  note: >-
+    Not first-party. Do not treat as a Waystar SDK. Verified via
+    registry.npmjs.org package metadata on 2026-08-15.
+rejected_candidates:
+- name: '@waystar/jira-mcp'
+  registry: npm
+  version: 0.7.0
+  published: '2026-06-19'
+  repository: https://github.com/WayStarCorp/jira-mcp
+  reason: >-
+    NOT Waystar the healthcare company. The npm scope @waystar and the GitHub org
+    WayStarCorp are a name collision - the org was created 2026-02-06, carries no
+    name, website, location or bio, and its single repository is a fork of
+    Dsazz/mcp-jira "with fixes for Jira Cloud search API changes used via Cursor
+    MCP". It has no connection to waystar.com and nothing to do with healthcare
+    revenue cycle management. Attributing it would credit Waystar with an MCP
+    server it did not publish.
+registries_probed:
+- {registry: npm, query: waystar, result: 2 hits, first_party: 0}
+- {registry: pypi, package: waystar, http_status: 404}
+- {registry: rubygems, query: waystar, result: empty}
+- {registry: nuget, query: waystar, result: 2 unrelated hits (Optikode interoperability SDKs), first_party: 0}
+- {registry: crates.io, query: waystar, result: 0}
+- {registry: packagist, query: waystar, result: 0 relevant}
+- {registry: maven-central, query: waystar, result: not published}
+github:
+  organization: https://github.com/WaystarInc
+  verified: >-
+    api.github.com/orgs/WaystarInc returns login WaystarInc, name "Waystar",
+    blog https://www.waystar.com - this is Waystar's own organization.
+  public_repos: 2
+  repositories:
+  - {name: WaystarInc/harnesscd-example-apps, language: CSS, pushed: '2023-06-28', description: Example Apps to Demonstrate Harness CD & GitOps}
+  - {name: WaystarInc/importer-issue-ops, language: null, pushed: '2023-09-14', description: GitHub Actions Importer issue-ops template}
+  note: >-
+    Both repositories are forks of third-party CI/CD example templates, last
+    pushed in 2023. Neither is a client library, an API artifact or a code
+    sample. The organization is real and belongs to Waystar, so a
+    GitHubOrganization pointer is emitted, but it must not be read as evidence of
+    a published SDK.
+  no_org_found:
+  - waystar
+  - waystarhealth
+  - waystar-health
+  - Waystar-Inc
+distribution_channels:
+  note: >-
+    What Waystar distributes instead of packages.
+  items:
+  - channel: PDF companion guides and worked request/response samples in the
+      developer portal
+    note: The practical substitute for an SDK; see sandbox/waystar-sandbox.yml.
+  - channel: SFTP file exchange at sshftp.waystar.com
+    note: >-
+      Extension-routed batch files (.CLP/.CLI/.CLD/.ELG/.835/.276/.HL7...). No
+      client tooling is published for them.
+  - channel: PM/HIS/EHR vendor integrations
+    note: >-
+      Waystar's real distribution is partner-embedded - 500+ PM and HIS systems
+      per its own marketing - so the integration code lives inside partner
+      products rather than in a public SDK.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

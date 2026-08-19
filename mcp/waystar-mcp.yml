@@ -1,0 +1,73 @@
+generated: '2026-08-15'
+method: searched
+status: none
+source: >-
+  npm registry search, GitHub org/repo search, MCP registry and directory search,
+  and live probes of every Waystar and ZirMed host
+provider: Waystar
+providerId: waystar
+description: >-
+  Waystar publishes no MCP server, hosted or local. This file records a searched
+  absence. No MCPServer pointer is emitted in apis.yml, because a pointer asserts
+  that the provider ships an agent surface and Waystar does not.
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: unknown
+  verified: searched
+tools: []
+candidate_derivation:
+  attempted: false
+  reason: >-
+    A candidate tool list is normally derived from OpenAPI operationIds. Waystar
+    publishes no OpenAPI or Swagger document on any host (see
+    conformance/waystar-conformance.yml, id openapi), so there are no
+    operationIds to derive tools from. Deriving tools from prose product
+    descriptions would be fabrication, so none were written.
+searched:
+  npm:
+    query: waystar
+    hits: 2
+    first_party_mcp: 0
+    note: >-
+      '@waystar/jira-mcp' (GitHub org WayStarCorp) is a name collision, not this
+      company - see packages/waystar-packages.yml rejected_candidates. It is an
+      MCP server for Jira, forked from Dsazz/mcp-jira, published by an
+      unaffiliated org created 2026-02-06 with no link to waystar.com.
+  github:
+    org: WaystarInc
+    mcp_repos: 0
+  probes:
+  - {url: 'https://developer.waystar.com/.well-known/agent-card.json', status: 404}
+  - {url: 'https://www.waystar.com/.well-known/agent-card.json', status: 404}
+  - {url: 'https://developer.waystar.com/.well-known/agent.json', status: 404}
+  - {url: 'https://www.waystar.com/.well-known/agent.json', status: 404}
+  - {url: 'https://developer.waystar.com/llms.txt', status: 404}
+  - {url: 'https://www.waystar.com/llms.txt', status: 404}
+  api_hosts_probed:
+  - eligibilityapi.zirmed.com
+  - claimsapi.zirmed.com
+  - zpayapi.zirmed.com
+  - estimationapi.zirmed.com
+  - priorauthorizationapi.waystar.com
+  - remitsapi.waystar.com
+  - login.zirmed.com
+  api_hosts_result: >-
+    All seven resolve and answer HTTP, and all returned 404 on /openapi.json,
+    /swagger.json, /api-docs, /llms.txt, /.well-known/agent-card.json and
+    /.well-known/agent.json. No MCP endpoint, no agent card, no machine-readable
+    contract.
+agent_surface_assessment:
+  summary: >-
+    Waystar has no agent surface today. The obstacle is upstream of MCP - there
+    is no public machine-readable contract to project into tools, the
+    authentication model is six different hand-rolled schemes dominated by HMAC
+    canonicalization (authentication/waystar-authentication.yml), and the two
+    newest REST surfaces are submit-then-poll rather than synchronous
+    (conventions/waystar-conventions.yml). Any agent integration today is bespoke
+    code written by a contracted partner.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

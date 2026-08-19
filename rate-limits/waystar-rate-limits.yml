@@ -1,10 +1,13 @@
 specification: API Commons Rate Limits
 specificationVersion: '0.1'
 schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+generated: '2026-08-15'
+method: searched
+source: https://developer.waystar.com/documents/claim-and-denial-management/claim-management/
 provider: Waystar
 providerId: waystar
 created: '2026-07-04'
-modified: '2026-07-04'
+modified: '2026-08-15'
 reconciled: false
 tags:
 - Healthcare
@@ -13,53 +16,110 @@ tags:
 - X12 EDI
 - Rate Limiting
 - Quotas
+limit_count: 1
 description: >-
-  Waystar does not publish public numeric rate limits for its APIs. As a
-  partner/client-gated clearinghouse, throughput, concurrency, and any
-  per-account throttles are governed by the client or partner contract and by
-  payer-side constraints on the underlying X12 transactions (eligibility,
-  status, claims, remits, authorizations). Real-time transactions and batch/sFTP
-  submission windows are provisioned per integration. Specific per-second or
-  per-day caps are not documented publicly.
-notes: >-
-  All values here are modeled/undisclosed. Confirm concrete real-time
-  concurrency, batch windows, and throttle behavior with Waystar during
-  partner onboarding. Payer availability windows and downstream payer limits
-  can bound effective throughput independent of Waystar's own limits.
-sources:
-- https://developer.waystar.com/
-- https://www.waystar.com/clients-partners/
-- https://www.waystar.com/
+  Waystar publishes exactly ONE numeric API limit: ImmediateClaims rejects any
+  submission of more than 50 claims, effective 2019-08-01, with the error
+  "Invalid request. Too many claims." Everything else is undisclosed. There are
+  no per-second, per-minute or per-day request caps published on any surface, no
+  documented concurrency ceiling, and no published quota tied to a plan. Rates
+  and concurrency are set by the client or partner contract and are further
+  bounded by the downstream payer.
+response_headers:
+  published: none
+  ratelimit_headers: false
+  retry_after: false
+  note: >-
+    CORRECTED 2026-08-15. Waystar returns no RateLimit-*, no X-RateLimit-*, and no
+    Retry-After header on any documented surface, and no 429 is documented. An
+    earlier version of this file recorded responseCodes.throttled 429 and advised
+    honoring Retry-After; both were modeled assumptions, not published Waystar
+    behavior, and are removed. An agent cannot detect throttling from a Waystar
+    response header - it has to infer it from errors and latency.
+  ref: conventions/waystar-conventions.yml#rate_limit_signaling
 responseCodes:
-  throttled: 429
+  throttled: not published
 limits:
-- name: Real-Time API Requests
+- name: ImmediateClaims batch size
+  scope: per-request
+  metric: claims
+  limit: 50
+  window: per submission
+  published: true
+  effective: '2019-08-01'
+  enforcement: 'Rejected with "Invalid request. Too many claims."'
+  remediation: Chunk submissions to 50 claims or fewer.
+  source: https://developer.waystar.com/documents/claim-and-denial-management/claim-management/
+- name: Estimation duplicate-POST suppression
+  scope: per-signature
+  metric: identical POSTs
+  limit: 1
+  window: 30 seconds
+  published: true
+  note: >-
+    Not a throttle - a deduplication window. Duplicate POSTs within 30 seconds
+    with an identical HMAC signature and content are ignored rather than creating
+    a second estimate. Recorded here because an integrator retrying on a timeout
+    will experience it as a suppressed request.
+  ref: conventions/waystar-conventions.yml#idempotency
+- name: SFTP connection attempts
+  scope: per-source-IP
+  metric: failed connections
+  limit: 5
+  window: consecutive
+  published: true
+  enforcement: The source IP is blocked/blacklisted after 5 consecutive unsuccessful connection attempts.
+  source: https://developer.waystar.com/documents/integration-basics/ssh-ftp-instructions/
+- name: Real-time API requests
   scope: account
   metric: requests
   limit: not published
+  published: false
   notes: Real-time eligibility/status/auth transaction rates are contract- and payer-governed; no public numeric cap.
-- name: Real-Time Concurrency
+- name: Real-time concurrency
   scope: account
   metric: concurrent
   limit: not published
+  published: false
   notes: Concurrent real-time transaction limits are provisioned per integration.
-- name: Batch / sFTP Submission
+- name: Batch / SFTP submission
   scope: account
   metric: files
   limit: contract-defined
-  notes: Batch claim and file exchange volumes/windows are set by the client agreement.
-- name: Payer-Side Availability
+  published: false
+  notes: Batch claim and file exchange volumes and windows are set by the client agreement.
+- name: Payer-side availability
   scope: payer
   metric: availability
   limit: payer-dependent
-  notes: Downstream payer maintenance windows and limits can bound effective throughput regardless of Waystar limits.
+  published: false
+  notes: >-
+    Downstream payer maintenance windows and payer timeouts bound effective
+    throughput regardless of any Waystar limit, and surface as "Failed at Payer"
+    or payer-timeout conditions rather than as a throttle.
 policies:
-- name: Undisclosed Limits
-  description: Waystar does not publicly document numeric API rate limits; they are established per partner/client contract.
-- name: Backoff Strategy
-  description: Clients should implement exponential backoff with jitter and honor Retry-After on 429 responses.
-- name: Payer Windows
-  description: Real-time transactions may be constrained by payer availability windows outside Waystar's control.
+- name: Undisclosed request rates
+  description: >-
+    Waystar does not publicly document numeric request-rate limits; they are
+    established per partner/client contract during onboarding.
+- name: No runtime throttling signal
+  description: >-
+    Because no rate-limit headers and no 429 are published, a client cannot back
+    off on a signal. Retry logic must be conservative and must not blind-retry
+    claim submission or payment calls, which are not idempotent.
+- name: Payer windows
+  description: >-
+    Real-time transactions may be constrained by payer availability windows
+    outside Waystar's control.
+sources:
+- https://developer.waystar.com/documents/claim-and-denial-management/claim-management/
+- https://developer.waystar.com/documents/patient-access/patient-estimation/
+- https://developer.waystar.com/documents/integration-basics/ssh-ftp-instructions/
+- https://www.waystar.com/clients-partners/
+notes: >-
+  Confirm concrete real-time concurrency, batch windows and throttle behavior with
+  Waystar during partner onboarding. The 50-claim cap and the 5-failed-SFTP-login
+  block are the only hard numbers Waystar states in public.
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com

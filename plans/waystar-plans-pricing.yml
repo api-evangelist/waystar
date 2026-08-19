@@ -1,11 +1,30 @@
 specification: API Commons Plans
 specificationVersion: '0.1'
 schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+generated: '2026-08-15'
+method: searched
+source: https://www.waystar.com/clients-partners/
 provider: Waystar
 providerId: waystar
 created: '2026-07-04'
-modified: '2026-07-04'
+modified: '2026-08-15'
 reconciled: false
+plan_count: 0
+published_pricing: false
+pricing_page:
+  exists: false
+  probes:
+  - {url: 'https://www.waystar.com/pricing/', status: 404}
+  - {url: 'https://www.waystar.com/clients-partners/', status: 200}
+  - {url: 'https://developer.waystar.com/register/', status: 200}
+  note: >-
+    Waystar publishes NO pricing page and NO plan tiers. plan_count is 0 because
+    zero plans are published, not because none were looked for. The two entries
+    under plans[] below are MODELED access routes - a client platform agreement
+    and a technology-partner agreement - written to describe how access is
+    actually obtained. They are not published tiers, carry no published price,
+    and must not be read as one. Waystar is a quote-based enterprise vendor:
+    every figure is negotiated per contract.
 tags:
 - Healthcare
 - Revenue Cycle Management
@@ -88,7 +107,7 @@ plans:
     userMultiplied: false
   elements:
   - name: Developer Portal Access
-  - name: API Credentials (HMAC / OAuth 2.0)
+  - name: API Credentials (HMAC key, RealTime API user, SFTP login - no OAuth 2.0)
   - name: Sandbox Environment
   - name: Integration Support
 maintainers:

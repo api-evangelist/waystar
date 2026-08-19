@@ -1,0 +1,94 @@
+generated: '2026-08-14'
+method: searched
+source: https://developer.waystar.com/documents/integration-basics/test-sandbox-accounts/
+provider: Waystar
+providerId: waystar
+description: >-
+  Waystar's test/sandbox posture. There IS a sandbox, but it is provisioned by a
+  human, not self-served, and Waystar publishes NO magic test values - no test
+  card numbers, no test member IDs, no test payer IDs, no simulated decline
+  triggers. The entire published sandbox documentation is one sentence directing
+  the integrator to email a team. That is the finding.
+availability:
+  self_service: false
+  published_test_values: false
+  provisioning: >-
+    "If you do not have a Test (also known as a Sandbox) Account, please contact
+    our Technical Integration Team at waystartechnicalintegrationteam@waystar.com."
+  request_contact: waystartechnicalintegrationteam@waystar.com
+  hmac_test_key_contact: apisupport@waystar.com
+  hmac_note: >-
+    "Contact apisupport@waystar.com to receive an HMAC Key for testing purposes."
+    Test HMAC keys are issued per requester; there is no published shared test key.
+test_vs_live_separation:
+  mechanism: separate-account
+  key_prefixes: none
+  note: >-
+    Waystar does not use a key-prefix convention (no live_/test_ style marker).
+    Test and production are separated by CustID/account provisioning and, in some
+    cases, by host. A caller cannot tell from the credential alone whether it is
+    pointed at test or production - a real operational hazard on a surface that
+    submits claims and debits cards.
+verifiable_examples:
+  note: >-
+    The only self-checking value Waystar publishes is an HMAC worked example. It
+    is a signature-algorithm conformance vector, not a transaction test value -
+    it lets a developer confirm their HMAC code is correct before ever calling
+    the API. Recorded verbatim because it is genuinely useful and genuinely
+    published.
+  hmac_sha1_vector:
+    purpose: >-
+      "The HMAC signature value shown below is actually based on the shown HMAC
+      key and data string, so that you may confirm that your HMAC code is
+      functioning properly."
+    sample_post_data: 'CustID=00000&TS=01/01/2012 12:01:01 AM&TransID=012345&Amount=20.00&CardNum=&ExpirationDate=12/12'
+    canonicalized: 'Amount20.00CustID00000ExpirationDate12/12TransID012345TS01/01/2012 12:01:01 AM'
+    algorithm: HMAC-SHA1, Base64
+    note: >-
+      The sample HMAC key and computed signature are published in the Waystar
+      HMAC Security document as a self-check vector. They are documentation
+      example values for a retired sample account, not credentials, and are
+      deliberately not reproduced here - fetch them from the source page.
+    source: https://developer.waystar.com/documents/integration-basics/hmac-security-for-web-services-api-information/
+  hmac_sha256_header_shape:
+    example_form: 'Authorization: HMAC <CustID>:<base64-signature>'
+    date_header_form: 'Mon, 12 Jan 2015 20:50:07 GMT'
+    source: https://developer.waystar.com/documents/patient-access/patient-estimation/
+sample_payloads_published:
+  note: >-
+    In lieu of test values, Waystar publishes worked request/response samples in
+    the product documentation. These are the practical substitute for a fixture
+    library and are what an integrator builds against.
+  items:
+  - {surface: eligibility, sample: 'Sample POST 270 (X12), Sample 271 response, Sample SF1 simplified-format POST, sample HTML/TEXT/FullJSON/X12definedXML responses', url: 'https://developer.waystar.com/documents/patient-access/insurance-verification/'}
+  - {surface: claim-status, sample: 'Example 276 request, CORE SOAP request/response envelopes, example 277 with a coverage-detection message embedded', url: 'https://developer.waystar.com/documents/claim-and-denial-management/claim-management-2/'}
+  - {surface: claims, sample: 'ImmediateClaims SOAP request/response, GetClaimHistory request/response with ClaimViewPDF linkbacks', url: 'https://developer.waystar.com/documents/claim-and-denial-management/claim-management/'}
+  - {surface: zpay, sample: 'Sample POSTs and <response><code id.../></response> bodies for credit card authorize/debit/refund, ACH debit/refund, cash debit/refund, void, status, token create/delete/sale, and the EPIC transaction variants', url: 'https://developer.waystar.com/documents/payment-management/patient-payments/'}
+  - {surface: estimation, sample: 'Sample XML and JSON estimate request/response, C# HttpRequestMessage signing example', url: 'https://developer.waystar.com/documents/patient-access/patient-estimation/'}
+  - {surface: prior-authorization, sample: 'Example initial POST 278x215 request, example GET status call, final 278x215 response', url: 'https://developer.waystar.com/documents/patient-access/prior-authorization/'}
+  - {surface: coverage-detection, sample: 'CSV request/response/error-report file layouts, 270 batch inbound and 271 response formats', url: 'https://developer.waystar.com/documents/patient-access/coverage-detection/'}
+reserved_values:
+  note: These are the only reserved/sentinel identifiers Waystar publishes.
+  values:
+  - {value: SELF, field: PayerID, meaning: self-pay, surface: estimation}
+  - {value: Self00, field: PayerID, meaning: 'recommended tracking payer ID for Coverage Detection batch 270s ("The payer in the 270 is not relevant for processing")', surface: coverage-detection}
+  - {value: A40, field: HL7 MSH.8 message type, meaning: delete patient - marks the Patient Center record inactive, surface: patient-center}
+test_clocks:
+  supported: false
+  note: No time simulation, test clock, or event-trigger tooling is published.
+decline_simulation:
+  supported: false
+  note: >-
+    ZPay publishes no test card numbers and no decline-trigger values. Declines
+    can only be exercised against a provisioned test account with values supplied
+    by the Waystar Technical Integration Team.
+sandbox_hosts:
+  published: false
+  note: >-
+    No separate sandbox hostnames are published. One QA host appears incidentally
+    in a documentation asset URL (qa.zirmed.com, referenced from an XSLT used in
+    a claims edit-screen report sample); it is not documented as an integrator-
+    facing sandbox and should not be treated as one.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

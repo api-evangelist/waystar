@@ -1,0 +1,165 @@
+generated: '2026-08-15'
+method: searched
+source: https://developer.waystar.com/documents/
+also_source: http://status.esolutionsinc.com/
+provider: Waystar
+providerId: waystar
+description: >-
+  Versioning, deprecation and operational-transparency posture for the Waystar
+  API surface, read from the Waystar developer portal. Waystar has performed real
+  URI migrations with published sunset dates, but it publishes no formal
+  deprecation POLICY, no RFC 8594 Sunset/Deprecation headers and no public SLA.
+  UPDATED 2026-08-15 - a real first-party public status page WAS found this
+  round, at http://status.esolutionsinc.com/, on a Waystar-owned acquired-brand
+  domain. It is unlinked from every Waystar property and serves over plaintext
+  HTTP only, which is why earlier rounds recorded "no status page".
+versioning:
+  scheme: uri-path
+  note: >-
+    Version is a path segment near the host root (/1.0/, /2.0/v1/) and, on the
+    legacy ServiceHandler surface, a Version=1.0 query parameter. No version
+    header, no date-based train.
+  current:
+    eligibility: '1.0'
+    estimation: '1.0'
+    zpay: '1.0'
+    prior_authorization: '1.0'
+    credential_management: '1.0'
+    claim_history: 2.0/v1
+    legacy_service_handler: '1.0'
+  edi_versions:
+    x12: 005010 (HIPAA)
+    implementation_guides: [005010X279A1 (270/271), 005010X212 (276/277), 005010X215 + 005010X217 (278), 005010X222/X223/X224 (837), 005010X221 (835)]
+    hl7: v2.3 ADT (Patient Center)
+    saml: '2.0'
+    caqh_core: Phase II Connectivity Rule 2.2.0
+deprecation:
+  policy_url: null
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  note: >-
+    Waystar does NOT publish a deprecation policy document, a notice period, or
+    RFC 8594 Sunset/Deprecation response headers. Deprecations are communicated
+    as inline NOTE blocks in the affected product documentation, and the one
+    documented sunset had its date moved once. An integrator has no programmatic
+    way to detect an impending retirement.
+  observed_deprecations:
+  - deprecated: https://www.zirmed.com/Services/ServiceHandler.ashx
+    surfaces: [Claims Web Services, Remittance / EOB Image Web Service, Statements / Print Services]
+    replacements:
+    - https://claimsapi.zirmed.com/2.0/v1/History/GetClaimHistory
+    - https://remitsapi.waystar.com/geteobhistory/ServiceHandler.ashx
+    - https://printservices.zirmed.com/Statement
+    original_sunset: '2020-06-30'
+    revised_sunset: '2020-09-27'
+    breaking_change: >-
+      The replacement URIs REQUIRE a new TS (UTC timestamp) parameter that the
+      old URI did not, and the parameter is folded into the HMAC signature - so
+      the migration changes the signed representation, not just the host.
+    new_values: 'Claims adds ReqType valid value "CLMHIST" and a new TimeStamp parameter.'
+    source: https://developer.waystar.com/documents/claim-and-denial-management/claim-management/
+  observed_limits_changes:
+  - change: ImmediateClaims capped at 50 claims per request
+    effective: '2019-08-01'
+    source: https://developer.waystar.com/documents/claim-and-denial-management/claim-management/
+  forward_looking:
+  - note: >-
+      Waystar states the Prior Authorization JSON API framework will be reused for
+      real-time 278x217 authorization SUBMISSION as that functionality goes live,
+      and that additional status codes will be added then - an additive, non-
+      breaking expansion signalled in the docs.
+    source: https://developer.waystar.com/documents/patient-access/prior-authorization/
+status_page:
+  published: true
+  url: http://status.esolutionsinc.com/
+  platform: Pingdom Public Reports
+  found: '2026-08-15'
+  ownership: >-
+    esolutionsinc.com is a Waystar-owned domain - eSolutions was acquired by
+    Waystar in 2020 and www.esolutionsinc.com now 301s to https://www.waystar.com/.
+    The dashboard names Waystar's own services explicitly ("Waystar Claims -
+    claims.zirmed.com", "Waystar Remits - remits.zirmed.com"), so this is a
+    first-party Waystar uptime page published under an acquired brand's domain,
+    not a third-party monitor.
+  caveats:
+  - >-
+    HTTP ONLY. https://status.esolutionsinc.com/ does not complete a TLS
+    handshake (curl exit, no HTTP status); the page is reachable only over
+    plaintext http://. For a HIPAA-covered clearinghouse that is a real defect on
+    an otherwise useful surface.
+  - >-
+    It is an uptime monitor, not an incident-communication status page. Pingdom
+    Public Reports shows per-check up/down history and response time; there are
+    no incident posts, no scheduled-maintenance notices, no component
+    subscriptions and no machine-readable status API (no /api/v2/summary.json).
+  - >-
+    It is NOT linked from waystar.com, developer.waystar.com, or any Waystar
+    support page found in this pass. It is discoverable only by knowing the
+    acquired brand's hostname, which is why prior rounds recorded it as absent.
+  - >-
+    Coverage is partial. The dashboard monitors the acquired-brand estate
+    (eSolutions/ClaimRemedi/Recondo/RemitData) plus two ZirMed hosts. The newer
+    API hosts an integrator actually calls - eligibilityapi.zirmed.com,
+    estimationapi.zirmed.com, zpayapi.zirmed.com,
+    priorauthorizationapi.waystar.com - are NOT on it.
+  monitored_components:
+  - {name: Waystar Claims, host: claims.zirmed.com}
+  - {name: Waystar Remits, host: remits.zirmed.com}
+  - {name: Audit and Denial Management, host: adm.ecorpnet.com}
+  - {name: Clearinghouse Eligibility API - Santa Rosa, host: ws.providersportal.com}
+  - {name: Clearinghouse Portal - Santa Rosa, host: claimremedi.providersportal.com}
+  - {name: Eligibility, host: eligibility.ecorpnet.com}
+  - {name: Medicare Analytics, host: analytics.ecorpnet.com}
+  - {name: Medicare Claims Editor, host: claimseditor.ecorpnet.com}
+  - {name: Recondo - Command Center, host: commandcenter.recondohealth.net}
+  - {name: Titan - North Carolina, host: titan2.remitdata.net}
+  observed:
+    checked: '2026-08-15'
+    sample_component: Waystar Claims - claims.zirmed.com
+    uptime_last_7_days: 99.98%
+    avg_response_time_last_7_days: 394 ms
+    check_type: HTTP
+    check_resolution: 1 minute
+  probes:
+  - {url: 'http://status.esolutionsinc.com/', status: 200}
+  - {url: 'http://status.esolutionsinc.com/8096264', status: 200}
+  - {url: 'https://status.esolutionsinc.com/', status: 'TLS failure (no response)'}
+  - {url: 'https://status.recondohealth.net/', status: 302}
+  - {url: 'https://status.waystar.com/', status: 'NXDOMAIN'}
+  - {url: 'https://status.zirmed.com/', status: 'NXDOMAIN'}
+  - {url: 'https://www.waystar.com/status/', status: 404}
+  - {url: 'https://www.waystar.com/system-status/', status: 404}
+  - {url: 'https://waystar.statuspage.io/', status: '200 - FALSE POSITIVE, Atlassian marketing page; a control probe of a nonexistent subdomain also returns 200'}
+  note: >-
+    A real, public, first-party uptime dashboard DOES exist, on an acquired
+    brand's domain. Incident narrative and maintenance windows still run through
+    the Waystar client support center behind the client login. A StatusPage
+    pointer is emitted for this URL.
+sla:
+  published: false
+  url: null
+  note: >-
+    No public SLA or uptime target. Waystar publishes Support Terms
+    (https://www.waystar.com/support-terms/) and Master Product Terms
+    (https://www.waystar.com/master-product-terms/) as contract documents, but
+    neither states a numeric availability commitment on the public page.
+  contract_documents:
+  - https://www.waystar.com/master-product-terms/
+  - https://www.waystar.com/support-terms/
+  - https://www.waystar.com/mssa/
+  - https://www.waystar.com/pre-release-terms/
+availability_notes:
+  payer_dependency: >-
+    Effective availability of every real-time transaction is bounded by the
+    downstream PAYER, not by Waystar. Payer maintenance windows and payer-side
+    timeouts surface as "Failed at Payer" / payer timeout conditions. This is the
+    dominant operational reality of a clearinghouse API and is not covered by any
+    Waystar-side status signal.
+  batch_windows: >-
+    277U claim status response files are written to the SFTP download directory
+    at midnight Eastern on each day the account had claim activity.
+deprecated_operations: []
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

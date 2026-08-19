@@ -1,0 +1,180 @@
+generated: '2026-08-14'
+method: searched
+source: https://developer.waystar.com/documents/integration-basics/
+docs:
+- https://developer.waystar.com/documents/integration-basics/hmac-security-for-web-services-api-information/
+- https://developer.waystar.com/documents/integration-basics/credential-management-api/
+- https://developer.waystar.com/documents/integration-basics/sso/
+- https://developer.waystar.com/documents/integration-basics/directed-waystar-login/
+- https://developer.waystar.com/documents/patient-estimation/
+- https://developer.waystar.com/documents/patient-access/patient-estimation/
+- https://developer.waystar.com/documents/patient-access/insurance-verification/
+- https://developer.waystar.com/documents/claim-and-denial-management/claim-management/
+provider: Waystar
+providerId: waystar
+note: >-
+  Waystar does not publish an OpenAPI definition, so this profile is read
+  directly from the Waystar developer-portal documentation rather than derived
+  from securitySchemes. Waystar runs SIX distinct authentication models across
+  its API surface - they are not interchangeable, and which one applies depends
+  entirely on which product API is being called. Note the correction: the
+  original Waystar Developer Suite HMAC signature is HMAC-SHA1 Base64 (not
+  SHA256); only the newer Estimation API uses HMAC-SHA256. Getting this wrong
+  produces a 401 on every call.
+summary:
+  types: [hmac-signature, http-basic, credentials-in-payload, ws-security-usernametoken, mutualTLS, saml2-sso]
+  api_key_in: [body, header, query]
+  oauth2_flows: []
+  oauth2_supported: false
+  openid_connect: false
+  identity_unit: >-
+    CustID - a hierarchical Waystar customer identifier. Each client has a CustID;
+    each facility/site of that client also has a CustID and can be grouped under
+    the client. One HMAC key is issued per client and is valid for all of that
+    client's facilities.
+schemes:
+- name: WaystarHMAC-SHA1
+  type: hmac-signature
+  algorithm: HMAC-SHA1
+  encoding: base64
+  in: body
+  parameter: Signature
+  applies_to:
+  - Claims Web Services (claimsapi.zirmed.com)
+  - Remittance / EOB Web Service (remitsapi.waystar.com)
+  - Statements / Print Services (printservices.zirmed.com)
+  - ZPay payment transactions (zpayapi.zirmed.com)
+  - Legacy ServiceHandler (www.zirmed.com/Services/ServiceHandler.ashx)
+  canonicalization: >-
+    Sort the non-empty key/value pairs in case-insensitive alphabetical order,
+    concatenate keys and values into a single string with the "&" and "="
+    delimiters removed, then HMAC-SHA1 that string with the client's HMAC Key and
+    Base64-encode the result. Append it to the POST data as the "Signature" key.
+  failure: >-
+    A signature mismatch returns "401 Not Authorized" and the call is not
+    processed further.
+  key_issuance: >-
+    HMAC keys are issued per client by Waystar. Test keys are requested from
+    apisupport@waystar.com.
+  source: https://developer.waystar.com/documents/integration-basics/hmac-security-for-web-services-api-information/
+- name: WaystarHMAC-SHA256
+  type: hmac-signature
+  algorithm: HMAC-SHA256
+  encoding: base64
+  in: header
+  parameter: Authorization
+  scheme_prefix: HMAC
+  header_format: 'HMAC <CustID>:<base64 signature>'
+  applies_to:
+  - Patient Estimation API (estimationapi.zirmed.com/1.0)
+  canonicalization: >-
+    Concatenate, with no separators - (1) the request method (GET or POST), (2)
+    the full request URI lowercased including query string, (3) the Date header
+    value in yyyy-MM-ddTHH:mm:ss UTC form, (4) the CustID, (5) the Base64-encoded
+    request body. HMAC-SHA256 the UTF-8 representation with the UTF-8
+    WebCallEncryptionKey, Base64 the digest.
+  required_headers:
+  - name: Date
+    format: RFC 1123 UTC (e.g. 'Mon, 12 Jan 2015 20:50:07 GMT')
+    note: >-
+      Replay window - a POST is rejected unless its UTC timestamp is within
+      +/- 30 seconds of Waystar's clock.
+  key_name: WebCallEncryptionKey
+  source: https://developer.waystar.com/documents/patient-access/patient-estimation/
+- name: RealTimeAPICredentials
+  type: credentials-in-payload
+  in: body
+  parameters: [UserID, Password]
+  applies_to:
+  - Eligibility REST Gateway (eligibilityapi.zirmed.com/1.0/Rest/Gateway/GatewayAsync.ashx)
+  note: >-
+    The eligibility REST gateway takes the RealTime API UserID and Password as
+    POST form fields alongside the inquiry payload rather than as a header. A bad
+    username/password returns the error message "Authentication Failure".
+  source: https://developer.waystar.com/documents/patient-access/insurance-verification/
+- name: BasicAuth
+  type: http
+  scheme: basic
+  in: header
+  applies_to:
+  - Credential Management API (login.zirmed.com/RealTimeExternal/1.0/api/password/changepassword)
+  - Prior Authorization API (priorauthorizationapi.waystar.com/1.0)
+  note: >-
+    The RealTime External Credential Management API requires a valid RealTime API
+    user passed with HTTP Basic Auth. The user must additionally hold the "Allow
+    FTP Whitelisting" permission to rotate an SFTP password, and must have
+    permission on the supplied CustId.
+  source: https://developer.waystar.com/documents/integration-basics/credential-management-api/
+- name: WSSecurityUsernameToken
+  type: ws-security-usernametoken
+  in: soap-header
+  applies_to:
+  - Real-time claim status 276/277 (claimsapi.zirmed.com/ExternalClaimStatus/ExternalCSIntake/Process)
+  - Immediate Claims 837 intake (claimsapi.zirmed.com/ImmediateClaims/Intake/Process)
+  profile: >-
+    The 276/277 endpoint uses the OASIS WS-Security 1.0 UsernameToken profile
+    inside a CAQH CORE Rule 2.2.0 SOAP envelope. The ImmediateClaims endpoint
+    uses a Waystar-proprietary <SecurityHeaderElement> carrying <Username> and
+    <Password>. XML element names are case sensitive.
+  source: https://developer.waystar.com/documents/claim-and-denial-management/claim-management-2/
+- name: X509ClientCertificate
+  type: mutualTLS
+  applies_to:
+  - Eligibility SOAP (eligibilityapi.zirmed.com/1.0/Soap/CoreSoapAPI.svc/x509)
+  note: >-
+    Waystar exposes a separate SOAP endpoint suffixed /x509 for client-certificate
+    authentication, per the CAQH CORE Phase II Connectivity Rule (envelope
+    standard B).
+  source: https://developer.waystar.com/documents/patient-access/insurance-verification/
+- name: SAML2-SSO
+  type: saml2
+  version: '2.0'
+  applies_to:
+  - Waystar portal single sign-on (www.waystar.com)
+  note: >-
+    Waystar acts as the SAML 2.0 Service Provider; the client system is the
+    Identity Provider. Supports SP-initiated web SSO, W3C XML encryption, deep
+    linking to a specific portal URL, and programmatic creation/update of Waystar
+    portal users, roles, account access and default account.
+  source: https://developer.waystar.com/documents/integration-basics/sso/
+- name: DirectedWaystarLogin
+  type: credentials-in-payload
+  in: body
+  parameters: [LoginName, Password, URLRedirect]
+  endpoint: https://www.zirmed.com/private/vallogin.aspx
+  applies_to:
+  - Seamless portal login handoff
+  note: >-
+    Waystar states explicitly that the HMAC signature is NOT used or supported on
+    this call - security rests entirely on the login/password pair, so it must be
+    POSTed and never issued as a GET.
+  source: https://developer.waystar.com/documents/integration-basics/directed-waystar-login/
+- name: SFTPCredentials
+  type: sftp
+  host: sshftp.waystar.com
+  note: >-
+    Batch/file services authenticate with an SFTP login and password issued by the
+    Waystar implementation project manager. Waystar blocks/blacklists any IP
+    address after 5 consecutive unsuccessful connection attempts. FTP passwords
+    can be rotated through the Credential Management API.
+  source: https://developer.waystar.com/documents/integration-basics/ssh-ftp-instructions/
+credential_rotation:
+  supported: true
+  endpoint: https://login.zirmed.com/RealTimeExternal/1.0/api/password/changepassword
+  auth: http-basic
+  operations:
+    '1': FTP password only
+    '2': RealTime API password only
+    '3': both
+  note: >-
+    Waystar publishes a first-party credential-rotation API - uncommon in this
+    sector and a genuine agent-relevant capability, since a long-lived integration
+    can rotate its own API and SFTP secrets programmatically.
+transport_security:
+  tls: required
+  note: >-
+    Waystar states all HTTPS web service calls use up to 2048-bit RSA encryption.
+  source: https://developer.waystar.com/documents/integration-basics/privacy-and-security/
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

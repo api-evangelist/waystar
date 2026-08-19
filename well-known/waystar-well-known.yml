@@ -1,0 +1,76 @@
+generated: '2026-08-14'
+method: probed
+source: live HTTPS probes of every Waystar/ZirMed host named in apis.yml and in the
+  Waystar developer portal documentation
+note: >-
+  Every /.well-known/ path probed returned 404 (or a 403 edge block on
+  api.waystar.com). No WellKnown or SecurityTxt pointer is emitted in apis.yml
+  because no path returned a 200 carrying a real document. developer.waystar.com
+  and www.waystar.com answer /.well-known/* with the site's ordinary 404 HTML
+  page; api.waystar.com answers every path with a 403 challenge page and serves
+  no public content. This file records a verified ABSENCE, which is valid data -
+  it is not evidence that Waystar serves a well-known surface.
+hosts:
+- host: developer.waystar.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /llms.txt
+    status: 404
+- host: www.waystar.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 301
+    note: 301 with a 4-byte body; does not resolve to a document
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /llms.txt
+    status: 404
+- host: api.waystar.com
+  note: >-
+    Host resolves and terminates TLS but every path returns a 403 edge challenge
+    page. No public document is served. It is not one of the API hosts Waystar
+    documents; the documented hosts are eligibilityapi.zirmed.com,
+    claimsapi.zirmed.com, zpayapi.zirmed.com, estimationapi.zirmed.com,
+    priorauthorizationapi.waystar.com and remitsapi.waystar.com.
+  documents:
+  - path: /.well-known/security.txt
+    status: 403
+  - path: /.well-known/agent-card.json
+    status: 403
+  - path: /.well-known/openid-configuration
+    status: 403
+  - path: /.well-known/oauth-authorization-server
+    status: 403
+security_txt:
+  served: false
+  note: >-
+    Waystar publishes a responsible-disclosure policy as an ordinary web page at
+    https://www.waystar.com/responsible-disclosure/ with the contact
+    security@waystar.com, but does NOT serve an RFC 9116 /.well-known/security.txt
+    on any host. See security/waystar-vulnerability-disclosure.yml.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

@@ -1,0 +1,201 @@
+generated: '2026-08-14'
+method: searched
+source: https://developer.waystar.com/documents/integration-basics/privacy-and-security/
+provider: Waystar
+providerId: waystar
+description: >-
+  Standards and compliance posture Waystar asserts on its own developer portal and
+  public site, plus what is verifiable from the documented API surface. Waystar is
+  a HIPAA-covered health care clearinghouse; its conformance profile is dominated
+  by X12 EDI and CAQH CORE rather than by the web-API standards this catalog
+  usually measures.
+standards:
+- id: x12-005010
+  name: ASC X12N 005010 HIPAA transaction sets
+  conforms: true
+  evidence: >-
+    Waystar documents 270/271 (005010X279A1), 276/277 (005010X212), 278 x215 and
+    x217, 837P/837I/837D and 835 across its product APIs and SFTP file services,
+    with sample payloads in the developer portal.
+  source: https://developer.waystar.com/documents/patient-access/insurance-verification/
+- id: caqh-core-phase-ii-connectivity
+  name: CAQH CORE Phase II Connectivity Rule 2.2.0
+  conforms: true
+  evidence: >-
+    Waystar exposes both CORE envelope standard A (MIME,
+    /1.0/Mime/inquiry) and envelope standard B (SOAP,
+    /1.0/Soap/CoreSoapAPI.svc and a /x509 client-certificate variant) for
+    real-time eligibility, and uses COREEnvelopeRealTimeRequest /
+    COREEnvelopeRealTimeResponse with PayloadType X12_276_Request_005010X212 for
+    real-time claim status.
+  source: https://developer.waystar.com/documents/patient-access/insurance-verification/
+- id: hipaa
+  name: HIPAA (Privacy, Security, Transactions and Code Sets)
+  conforms: true
+  evidence: >-
+    "HIPAA considers Waystar to be a health care clearinghouse, and as such, we
+    are required to comply with HIPAA rules and regulations."
+  source: https://developer.waystar.com/documents/integration-basics/privacy-and-security/
+- id: glba
+  name: Gramm-Leach-Bliley Act privacy and security standards
+  conforms: true
+  evidence: >-
+    "Waystar is also required to comply with the privacy and security standards
+    issued and promulgated under the Gramm-Leach-Bliley Act concerning financial
+    services transactions."
+  source: https://developer.waystar.com/documents/integration-basics/privacy-and-security/
+- id: pci-dss
+  name: PCI DSS
+  conforms: true
+  evidence: >-
+    "Waystar is PCI DSS compliant, ensuring that customer account data is
+    protected." Consistent with the ZPay card surface, which issues tokens
+    precisely so integrators avoid storing PAN.
+  source: https://developer.waystar.com/documents/integration-basics/privacy-and-security/
+- id: ssae-16
+  name: SSAE 16 attestation (predecessor of SOC 1 / SSAE 18)
+  conforms: true
+  evidence: >-
+    "Waystar passed the Statements on Standards for Attestation Engagements
+    (SSAE 16), certifying that transactions processed by Waystar are securely
+    controlled." NOTE - SSAE 16 was superseded by SSAE 18 in 2017; the developer
+    portal page carrying this claim was last modified 2020-10-27, so the
+    attestation name on the public page is stale even if the underlying program
+    is current.
+  source: https://developer.waystar.com/documents/integration-basics/privacy-and-security/
+- id: ehnac
+  name: EHNAC accreditation (Electronic Healthcare Network Accreditation Commission)
+  conforms: true
+  evidence: '"...and is EHNAC accredited."'
+  source: https://developer.waystar.com/documents/integration-basics/privacy-and-security/
+- id: saml-2.0
+  name: SAML 2.0 web single sign-on
+  conforms: true
+  evidence: >-
+    "Waystar supports Security Assertion Markup Language 2.0 (SAML 2.0)... It
+    supports W3C XML encryption and service provider initiated web single sign-on
+    exchanges." Waystar is the Service Provider.
+  source: https://developer.waystar.com/documents/integration-basics/sso/
+- id: hl7-v2
+  name: HL7 v2.3 ADT
+  conforms: true
+  evidence: >-
+    Patient Center accepts HL7 v2.3 ADT messages; MSH.8 message type A40 marks a
+    patient inactive. A separate HL7 Prior Auth quick start guide is published.
+  source: https://developer.waystar.com/documents/payment-management/patient-center-patient-notebook/
+- id: rfc2104-hmac
+  name: HMAC message authentication (RFC 2104)
+  conforms: true
+  evidence: >-
+    HMAC-SHA1/Base64 body signature on the Developer Suite calls; HMAC-SHA256 in
+    an Authorization header on the Estimation API.
+  source: https://developer.waystar.com/documents/integration-basics/hmac-security-for-web-services-api-information/
+- id: rfc1123-date
+  name: RFC 1123 date header
+  conforms: true
+  evidence: The Estimation API requires the Date header in RFC 1123 form and folds it into the signature.
+  source: https://developer.waystar.com/documents/patient-access/patient-estimation/
+- id: oauth2
+  name: OAuth 2.0
+  conforms: false
+  evidence: >-
+    No OAuth 2.0 authorization server, no /.well-known/oauth-authorization-server
+    (404 on every host probed), and no OAuth flow in any published Waystar
+    documentation. Prior catalog copy asserting OAuth 2.0 was not supported by
+    the developer portal and is corrected here.
+- id: openid-connect
+  name: OpenID Connect
+  conforms: false
+  evidence: /.well-known/openid-configuration returns 404 on every Waystar host probed.
+- id: fhir-r4
+  name: HL7 FHIR R4
+  conforms: false
+  evidence: >-
+    No FHIR resource, endpoint, capability statement or SMART-on-FHIR surface
+    appears anywhere in the Waystar developer portal. Waystar's clinical/financial
+    exchange is X12 and HL7 v2, not FHIR. Notable given CMS-0057-F will require
+    FHIR-based prior authorization APIs of payers - Waystar sits on the PROVIDER
+    side of that requirement.
+- id: da-vinci-crd-dtr-pas
+  name: HL7 Da Vinci CRD / DTR / PAS
+  conforms: false
+  evidence: >-
+    Prior authorization is implemented as X12 278 (x215 status, x217 submission
+    planned) plus RPA against payer portals - not the Da Vinci FHIR profiles.
+- id: rfc9457-problem-details
+  name: RFC 9457 Problem Details for HTTP APIs
+  conforms: false
+  evidence: >-
+    No application/problem+json. Each surface returns its own error shape, and
+    the eligibility surface returns errors in-band inside an HTTP 200. See
+    errors/waystar-problem-types.yml.
+- id: openapi
+  name: OpenAPI
+  conforms: false
+  evidence: >-
+    No OpenAPI or Swagger document is published on any Waystar or ZirMed host.
+    Probes of /openapi.json, /openapi.yaml, /swagger.json and /api-docs on
+    developer.waystar.com and www.waystar.com all returned 404; api.waystar.com
+    returned 403 on every path. Machine-readable specification exists only as
+    downloadable PDF companion guides.
+- id: rfc8594-sunset
+  name: RFC 8594 Sunset header
+  conforms: false
+  evidence: >-
+    Waystar has performed URI sunsets with published dates but signals them only
+    as prose notes in the docs; no Sunset or Deprecation response header.
+- id: rfc9116-security-txt
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence: >-
+    /.well-known/security.txt returns 404 on every host. Waystar publishes a
+    responsible-disclosure page instead. See well-known/waystar-well-known.yml.
+- id: rest
+  name: REST architectural style
+  conforms: partial
+  evidence: >-
+    Waystar self-describes the MySurePayHealth estimation API as "using
+    Representational State Transfer (REST) principles against predictable URLs",
+    and the Estimation and Prior Authorization APIs are resource-shaped. The
+    older Developer Suite calls are form-POST RPC over a single ServiceHandler
+    endpoint with a ReqType discriminator, which is not REST.
+compliance_program:
+  published: false
+  publicly_readable: false
+  page: https://developer.waystar.com/documents/integration-basics/privacy-and-security/
+  certifications: [HIPAA, PCI DSS, SSAE 16, EHNAC, GLBA]
+  access_note: >-
+    CORRECTED 2026-08-15. The page carrying these certification claims is behind
+    the developer-portal login. Re-fetched anonymously on 2026-08-15 it returns
+    101KB of navigation and a login form and contains none of the strings HIPAA,
+    PCI, SSAE, EHNAC or Gramm - the document body is not served to an
+    unauthenticated reader. The only compliance statement Waystar publishes on a
+    genuinely public page is the word HIPAA inside its privacy policy and master
+    product terms, plus the responsible-disclosure line about protecting data
+    "above and beyond compliance with HIPAA and PCI regulations". That is a
+    passing mention, not a published compliance program.
+  trust_center: false
+  trust_center_note: >-
+    No trust.waystar.com (no TLS/no response) and no dedicated trust or
+    compliance page (https://www.waystar.com/compliance/ 404). There are no
+    downloadable attestation reports and no certification registry.
+    https://www.waystar.com/security/ resolves but names no certification at all -
+    it carries a marketing video titled "Security spotlight: A software platform
+    designed for trust". No TrustCenter pointer is emitted.
+  pointer_decision: >-
+    No type Compliance pointer is emitted in apis.yml. The certifications are real
+    claims Waystar makes, but it makes them behind a login, and the
+    compliance_published check asserts that the provider PUBLISHES its compliance
+    posture. Emitting the pointer would credit a gated page as a public one.
+regulatory_context:
+  regime: US healthcare
+  applicable:
+  - HIPAA Administrative Simplification (45 CFR Parts 160, 162, 164)
+  - HITECH
+  - Gramm-Leach-Bliley Act (payments)
+  - PCI DSS (card acceptance via ZPay)
+  - No Surprises Act - good faith estimates (Patient Estimation / price transparency)
+  - CMS Hospital Price Transparency (MySurePayHealth self-service estimator)
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

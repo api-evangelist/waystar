@@ -1,0 +1,198 @@
+generated: '2026-08-15'
+method: derived
+source: >-
+  conventions/waystar-conventions.yml (identifiers, file_services,
+  content_negotiation), errors/waystar-problem-types.yml,
+  sandbox/waystar-sandbox.yml (reserved_values),
+  authentication/waystar-authentication.yml, lifecycle/waystar-lifecycle.yml
+provider: Waystar
+providerId: waystar
+description: >-
+  Entity graph for the Waystar surface. DERIVED FROM ARTIFACTS IN THIS REPO, NOT
+  FROM A SPEC - Waystar publishes no OpenAPI, so there are no schema $refs to walk
+  and no components to enumerate. Every entity and every identifier below is one
+  the repo's searched artifacts actually name; nothing was invented to fill the
+  graph. Field lists are therefore deliberately partial: this is the identifier
+  and relationship skeleton an integrator must hold, not a complete object
+  reference. The authoritative field-level model is the X12 005010 implementation
+  guide for each transaction set, which Waystar wraps rather than replaces.
+derivation_basis: repo-artifacts
+completeness: partial
+entities:
+- name: Customer
+  id_field: CustID
+  description: >-
+    The root tenant. A hierarchical Waystar customer identifier - one per client
+    and one per facility/site, with facility CustIDs groupable under the client
+    CustID. It is the security boundary, not just a label: the HMAC key is bound
+    to it, and every token, claim and estimate is scoped to it.
+  notes:
+  - One HMAC key is issued per client and is valid for all of that client's facilities.
+  - A payment Token created under one CustID cannot be used under another.
+  source: conventions/waystar-conventions.yml#identifiers.primary
+- name: Payer
+  id_field: PayerID
+  description: >-
+    The destination insurance payer, identified by a Waystar Payer ID from the
+    published Payer ID List. Payer capability is per-transaction, not uniform - a
+    payer can be enabled for claims and not for eligibility, which surfaces as
+    "Payer ... is not setup for eligibility" or "Payer Inactive".
+  reserved_values:
+  - {value: SELF, meaning: self-pay, surface: estimation}
+  - {value: Self00, meaning: recommended tracking payer ID for Coverage Detection batch 270s, surface: coverage-detection}
+  source: sandbox/waystar-sandbox.yml#reserved_values
+- name: EligibilityInquiry
+  id_field: InquiryId
+  transaction: X12 270 request / 271 response
+  description: >-
+    A real-time or batch coverage and benefits inquiry. Returns coverage status,
+    plan detail, copays, deductibles and service-type benefits.
+  response_formats: [HTML, TEXT, 271, JSON, FullJSON, X12definedXML]
+  caution: >-
+    Selected by the ResponseType request parameter, not by Accept. HTML and TEXT
+    are cosmetic and change without notice.
+- name: Estimate
+  id_field: EstimateID
+  description: >-
+    A pre-service patient cost estimate, created by POST and then polled. Carries
+    two independent status fields that must both be read.
+  status_fields:
+  - {field: EligibilityStatus, values: [Active Coverage, Inactive Coverage, Pending, Error]}
+  - {field: EstimateStatus, values: [Complete, Incomplete]}
+  artifacts: [PDF summary retrievable by EstimateID]
+- name: AuthorizationRequest
+  transaction: X12 278 (005010X215 status, 005010X217 submission)
+  description: >-
+    A prior authorization or referral review request, submitted then polled for a
+    determination. Waystar layers RPA against payer portals where a payer has no
+    278 transaction.
+  caution: >-
+    Status "Not Found" can be a FINAL status, not a not-yet - it requires a fresh
+    278x215 submission later, not a longer poll.
+- name: Claim
+  id_field: zirmedclaimid
+  instance_id_field: zirmedinstanceid
+  transaction: X12 837P / 837I / 837D
+  description: >-
+    A professional, institutional or dental claim submitted through the
+    clearinghouse. The instance identifier distinguishes resubmissions and
+    corrections of the same claim.
+  artifacts: [ClaimViewPDF linkback URLs returned by claim history]
+  limits:
+  - 50 claims maximum per ImmediateClaims submission (effective 2019-08-01)
+- name: ClaimStatus
+  transaction: X12 276 inquiry / 277 response
+  description: >-
+    The status of a submitted claim at the payer - received, accepted, pending,
+    denied, paid.
+  code_sets:
+  - X12 277 Claim Status Category Codes and Claim Status Codes (STC segment)
+  - Waystar disposition-status string placed inside STC 12, matched by "string contains"
+- name: Remittance
+  transaction: X12 835 (ERA)
+  description: >-
+    Electronic remittance advice - payments and adjustments for posting and
+    reconciliation, available as raw X12 835 and as parsed output.
+  code_sets:
+  - Claim Adjustment Reason Codes (CARC)
+  - Remittance Advice Remark Codes (RARC)
+- name: Denial
+  description: >-
+    A denied claim outcome exposed with its denial and remark codes and
+    explanation-of-benefits detail, feeding appeal creation, packaging and
+    resubmission.
+  derived_from: [Remittance, ClaimStatus]
+- name: PaymentToken
+  id_field: Token
+  format: GUID
+  description: >-
+    A ZPay payment token standing in for a card or bank account so an integrator
+    never stores a PAN.
+  lifecycle: [create, sale, delete]
+  failure: 'Code 222 / status ZM "Invalid token" - unknown, expired, or created under a different CustID.'
+- name: PaymentTransaction
+  id_field: TransID
+  description: >-
+    A ZPay credit card, ACH or cash transaction - authorize, debit, refund, void -
+    plus a status query. Also exposed in an EPIC-specific variant returning
+    e_status / e_message pairs.
+  caution: >-
+    NOT idempotent. No deduplication window is published on the payment
+    endpoints; call Transaction/Status before any retry.
+- name: Patient
+  description: >-
+    A patient record maintained in Patient Center / Patient Notebook, kept in sync
+    by HL7 v2.3 ADT messages.
+  hl7: 'MSH.8 message type A40 marks the record inactive (delete patient).'
+- name: FileTransfer
+  description: >-
+    A batch submission or response file exchanged over SFTP at sshftp.waystar.com.
+    Routing is by FILE EXTENSION - the extension IS the API.
+  extensions: [.CLP, .CLI, .CLD, .ELG, .EST, .COV, .PS, .PLB, .835, .276, .PAT, .HL7, .POP]
+  response_naming: '[CustID].[FileCreateDate CCYYMMDD].[FileCreateTime 24HHMMSSNNN].CL[P/I].277.txt'
+  schedule: 277U responses written to the download directory at midnight Eastern on days with claim activity.
+- name: APICredential
+  description: >-
+    A RealTime API user, an HMAC key, or an SFTP login. Rotatable through the
+    first-party Credential Management API.
+  rotation_operations:
+    '1': FTP password only
+    '2': RealTime API password only
+    '3': both
+relationships:
+- {from: Customer, to: EligibilityInquiry, type: has_many, via: CustID}
+- {from: Customer, to: Estimate, type: has_many, via: CustID}
+- {from: Customer, to: AuthorizationRequest, type: has_many, via: CustID}
+- {from: Customer, to: Claim, type: has_many, via: CustID}
+- {from: Customer, to: Remittance, type: has_many, via: CustID}
+- {from: Customer, to: PaymentToken, type: has_many, via: CustID}
+- {from: Customer, to: PaymentTransaction, type: has_many, via: CustID}
+- {from: Customer, to: Patient, type: has_many, via: CustID}
+- {from: Customer, to: FileTransfer, type: has_many, via: CustID}
+- {from: Customer, to: APICredential, type: has_many, via: CustID}
+- {from: EligibilityInquiry, to: Payer, type: belongs_to, via: PayerID}
+- {from: Claim, to: Payer, type: belongs_to, via: PayerID}
+- {from: AuthorizationRequest, to: Payer, type: belongs_to, via: PayerID}
+- {from: Estimate, to: Payer, type: belongs_to, via: PayerID}
+- {from: Estimate, to: EligibilityInquiry, type: has_one, via: benefits used to compute the estimate}
+- {from: Claim, to: ClaimStatus, type: has_many, via: zirmedclaimid}
+- {from: Claim, to: Remittance, type: has_many, via: claim matched in the 835}
+- {from: Claim, to: FileTransfer, type: belongs_to, via: batch file TracingNumber}
+- {from: Remittance, to: Denial, type: has_many, via: CARC/RARC adjustment}
+- {from: ClaimStatus, to: Denial, type: has_many, via: 277 STC denial status}
+- {from: PaymentToken, to: PaymentTransaction, type: has_many, via: Token}
+- {from: Patient, to: PaymentTransaction, type: has_many, via: patient account}
+- {from: PaymentTransaction, to: Customer, type: belongs_to, via: CustID}
+id_conventions:
+  prefixes: none
+  note: >-
+    Waystar uses no typed id prefixes (no cus_/est_/clm_ style). Identifiers are
+    opaque numerics or GUIDs, so an id carries no self-describing type
+    information - an agent must track which call produced which identifier.
+correlation:
+  note: >-
+    There is no request-id header on any surface. Cross-entity correlation is done
+    with domain identifiers - TransID and RequestID on signed calls, TracingNumber
+    (batch id) from ImmediateClaims, InquiryId on eligibility, EstimateID on
+    estimation, and the X12 TRN segment inside the EDI payloads.
+  ref: conventions/waystar-conventions.yml#tracing
+authoritative_field_model:
+  note: >-
+    Field-level structure is defined by the X12 implementation guides Waystar
+    carries, not by Waystar.
+  guides:
+  - 005010X279A1 (270/271 eligibility)
+  - 005010X212 (276/277 claim status)
+  - 005010X215 and 005010X217 (278 services review)
+  - 005010X222 / X223 / X224 (837 professional / institutional / dental)
+  - 005010X221 (835 remittance)
+  - HL7 v2.3 ADT (Patient Center)
+cross_references:
+  conventions: conventions/waystar-conventions.yml
+  errors: errors/waystar-problem-types.yml
+  authentication: authentication/waystar-authentication.yml
+  sandbox: sandbox/waystar-sandbox.yml
+  conformance: conformance/waystar-conformance.yml
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

@@ -1,4 +1,4 @@
-generated: '2026-07-11'
+generated: '2026-08-15'
 method: probed
 source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
 hosts:
@@ -7,16 +7,33 @@ hosts:
   tls_version: TLSv1.3
   cert_expires: Mar  8 23:59:59 2027 GMT
   hsts: false
+- host: eligibilityapi.zirmed.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Dec 12 23:59:59 2026 GMT
+  hsts: null
+- host: priorauthorizationapi.waystar.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov 10 23:59:59 2026 GMT
+  hsts: false
 domains:
 - domain: waystar.com
   dnssec: false
   caa:
+  - 0 issue "digicert.com; cansignhttpexchanges=yes"
+  - 0 issue "letsencrypt.org"
+  - 0 issue "pki.goog; cansignhttpexchanges=yes"
+  - 0 issue "ssl.com"
+  - 0 issuewild "comodoca.com"
   - 0 issuewild "digicert.com; cansignhttpexchanges=yes"
-  - 0 issuewild "letsencrypt.org"
-  - 0 issuewild "pki.goog; cansignhttpexchanges=yes"
-  - 0 issuewild "ssl.com"
-  - 0 issuewild "thawte.com"
-  - 0 issue "amazonaws.com"
+  spf: true
+  dmarc: false
+- domain: zirmed.com
+  dnssec: false
+  caa:
+  - 0 issue "letsencrypt.org"
+  - 0 issue "thawte.com"
   spf: true
   dmarc: true
-  dmarc_policy: reject
+  dmarc_policy: none
