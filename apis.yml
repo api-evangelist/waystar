@@ -48,7 +48,7 @@ tags:
 - Remittance
 created: '2026-07-04'
 modified: '2026-08-15'
-specificationVersion: '0.19'
+specificationVersion: '0.23'
 x-base-url-provenance: >-
   The baseURL on each API entry is the documented Waystar API host for that
   product, read from the Waystar developer portal and recorded in
