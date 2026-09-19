@@ -56,6 +56,17 @@ tags:
 - X12 EDI
 - Eligibility
 - Claims
+- Remittances
+tags_raw:
+- Healthcare
+- Revenue Cycle Management
+- RCM
+- Clearinghouse
+- Healthcare Payments
+- Medical Billing
+- X12 EDI
+- Eligibility
+- Claims
 - Remittance
 created: '2026-07-04'
 modified: '2026-08-15'
@@ -168,6 +179,11 @@ apis:
 - aid: waystar:waystar-remittance-era-api
   name: Waystar Remittance & ERA API
   tags:
+  - Remittances
+  - ERA
+  - X12 835
+  - Payment Posting
+  tags_raw:
   - Remittance
   - ERA
   - X12 835
