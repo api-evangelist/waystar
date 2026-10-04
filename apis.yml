@@ -56,7 +56,7 @@ tags:
 - X12 EDI
 - Eligibility
 - Claims
-- Remittances
+- Health Insurance
 tags_raw:
 - Healthcare
 - Revenue Cycle Management
@@ -67,7 +67,7 @@ tags_raw:
 - X12 EDI
 - Eligibility
 - Claims
-- Remittance
+- Health Insurance
 created: '2026-07-04'
 modified: '2026-08-15'
 specificationVersion: '0.23'
@@ -284,3 +284,5 @@ x-enrichment:
   status: enriched
   artifacts_added: 4
   pass: local-v1
+x-tags-removed:
+- Remittances
