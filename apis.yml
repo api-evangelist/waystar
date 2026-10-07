@@ -214,6 +214,8 @@ apis:
     resubmission workflows. Modeled from Waystar's denial prevention and recovery
     product; not backed by a published OpenAPI definition.
 common:
+- type: Pricing
+  url: https://www.waystar.com/clients-partners/
 - type: LinkedIn
   url: https://www.linkedin.com/company/waystar
 - type: Website
