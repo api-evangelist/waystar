@@ -1,0 +1,24 @@
+generated: '2026-10-14'
+method: searched
+checked:
+- eclinicalworks/integrations/eclinicalworks-integration-edges.yml
+source:
+- eclinicalworks/integrations/eclinicalworks-integration-edges.yml
+edges:
+- partner_name: eClinicalWorks (own)
+  partner: eclinicalworks
+  partner_match: mirror
+  mirror_match: domain
+  type: marketplace
+  relationship: platform-app
+  direction: third-party
+  channel: partner-built
+  marketplace: own
+  evidence: https://www.eclinicalworks.com/about-us/partners/clearinghouses/
+  mirror_of: eclinicalworks/integrations/eclinicalworks-integration-edges.yml
+  apps:
+  - Waystar
+  listing_count: 1
+  detected: '2026-10-14'
+  detected_by: mirror-platform-listings.py
+  category: clearinghouses
