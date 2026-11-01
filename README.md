@@ -1,4 +1,4 @@
-# Waystar (waystar)
+# Waystar
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -64,116 +64,123 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Waystar is a healthcare payments and revenue cycle management (RCM) software company that operates a national clearinghouse connecting providers to payers. Its cloud platform spans financial clearance (eligibility, prior authorization, patient estimation), claim management, payment and remittance management, and denial prevention and recovery. Waystar integrates with practice management (PM), hospital information systems (HIS), and EHRs through REST APIs, web services, HL7, sFTP/batch, RPA (bots), and X12 EDI transactions.
+Waystar is a healthcare payments and revenue cycle management (RCM) software company that operates a national clearinghouse connecting providers to payers. Its cloud platform spans financial clearance (eligibility, prior authorization, patient estimation), claim management, payment and remittance management, and denial prevention and recovery. Waystar exposes integration through REST APIs, web services, HL7, sFTP/batch, RPA, and X12 EDI transactions (270/271 eligibility, 276/277 claim status, 837 claims, 835 remittance/ERA, 278 authorization). API access is delivered through a partner/developer program at developer.waystar.com; the portal renders its full documentation navigation to anyone but serves a login form in place of every document body, and sandbox accounts are provisioned by email rather than self-service. Waystar publishes no OpenAPI, no llms.txt, no MCP server, no agent card and no client SDK in any package registry. Authentication is six hand-rolled schemes rather than one - HMAC-SHA1 body signatures on the classic Developer Suite, HMAC-SHA256 Authorization headers on Patient Estimation, credentials in the POST body on the eligibility gateway, HTTP Basic, WS-Security UsernameToken inside CAQH CORE SOAP envelopes, and X.509 client certificates - with no OAuth 2.0 and no OpenID Connect anywhere. The API surface below is documented from Waystar's public product pages, its developer-portal structure and the underlying X12 standards rather than from a published machine-readable definition.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/waystar/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/waystar/refs/heads/main/apis.yml)
+**Areas:** Healthcare · Revenue Cycle Management · Clearinghouse · Healthcare Payments · Medical Billing · X12 EDI · Eligibility · Claims · Health Insurance
 
-## Access Model — Partner / Developer Gated
+## Waystar on APIs.io
 
-Waystar operates a developer portal at [developer.waystar.com](https://developer.waystar.com/), and its public material describes integration via "REST APIs, web services, sFTP, HL7, batch, X12 EDI, RPA (bot)" along with "HMAC Security for Web Services / API Information" and a "Credential Management API." However:
+Everything profiled for Waystar is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/waystar/](https://apis.io/providers/waystar/)** — or go straight to one of the APIs or properties below.
 
-- **No public OpenAPI definition is published.** `/openapi.json`, `/openapi.yaml`, `/swagger.json`, `/api-docs` and `/llms.txt` return 404 on `developer.waystar.com`, `www.waystar.com` and on every documented Waystar/ZirMed API host. There is no MCP server, no A2A agent card, no `/.well-known/` document, and no client SDK in npm, PyPI, RubyGems, NuGet, crates.io, Packagist or Maven Central.
-- **The developer portal renders its full documentation navigation publicly but serves a login form in place of every document body.** Specifications exist as PDF companion guides behind that login.
-- **Authentication is six hand-rolled schemes, not one** — HMAC-SHA1 body signature, HMAC-SHA256 `Authorization` header, credentials in the POST body, HTTP Basic, WS-Security UsernameToken inside CAQH CORE SOAP, and X.509 client certificates — with **no OAuth 2.0 and no OpenID Connect**. See [`authentication/`](authentication/waystar-authentication.yml).
-- **Base URLs are now recorded** for six of the seven APIs. They are Waystar's documented product hosts; several sit on `zirmed.com`, Waystar's own legacy brand (both `zirmed.com` and `www.zirmed.com` 301 to `waystar.com`). Every host was verified to resolve inside Waystar's contiguous `69.2.x.x` netblock. The Denial & Appeal Management API has none because Waystar documents none.
-- Access is obtained by becoming a Waystar client or technology partner via [waystar.com/clients-partners](https://www.waystar.com/clients-partners/). Sandbox accounts are provisioned by email, not self-service.
+### APIs (7)
 
-This is an **honest gated profile**: the provider is real and exposes substantial programmatic integration, but the concrete contract is not published in machine-readable form.
+- [Waystar Eligibility Verification API](https://apis.io/apis/waystar/waystar-eligibility-verification-api/) — Real-time and batch insurance eligibility and benefits verification, exchanging X12 270 inquiries and 271 responses to confirm coverage, plan details,…
+- [Waystar Authorization & Referral API](https://apis.io/apis/waystar/waystar-prior-authorization-api/) — Automates prior authorization and referral determination and status, modeled on the X12 278 health care services review request/response. Covers submitting…
+- [Waystar Patient Estimation API](https://apis.io/apis/waystar/waystar-patient-estimation-api/) — Produces pre-service, good-faith patient cost estimates by combining eligibility/benefit data, contracted rates, and procedure codes to support price…
+- [Waystar Claim Management API](https://apis.io/apis/waystar/waystar-claim-management-api/) — Submits, scrubs, edits, tracks, and manages professional, institutional, and dental claims through Waystar's clearinghouse, modeled on the X12…
+- [Waystar Claim Status API](https://apis.io/apis/waystar/waystar-claim-status-api/) — Queries and monitors claim status across payers, modeled on the X12 276 status inquiry and 277 status response - returning received, accepted, pending,…
+- [Waystar Remittance & ERA API](https://apis.io/apis/waystar/waystar-remittance-era-api/) — Retrieves electronic remittance advice (835/ERA), payments, and adjustments for automated payment posting and reconciliation, with raw X12 835 artifacts and…
+- [Waystar Denial & Appeal Management API](https://apis.io/apis/waystar/waystar-denial-management-api/) — Identifies denied claims, exposes denial and remark codes and explanation-of-benefits detail, and supports appeal creation, packaging, and resubmission…
 
-## X12 EDI Transaction Coverage
+### Published properties
 
-Waystar's clearinghouse is built on the standard HIPAA X12 transaction sets, which is what the modeled APIs map to:
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-- **270 / 271** — Eligibility and benefit inquiry / response
-- **276 / 277** — Claim status inquiry / response
-- **278** — Health care services review (prior authorization / referral)
-- **837P / 837I / 837D** — Claims (professional / institutional / dental)
-- **835** — Remittance advice (ERA) / electronic payment
+#### Security (3)
 
-## Tags
+Authentication, trust centre, and vulnerability disclosure.
 
-- Healthcare
-- Revenue Cycle Management
-- RCM
-- Clearinghouse
-- Healthcare Payments
-- Medical Billing
-- X12 EDI
-- Eligibility
-- Claims
-- Remittance
+- [Waystar Authentication](https://apis.io/security/waystar/waystar-authentication/)
+- [Waystar Domain Security](https://apis.io/security/waystar/waystar-domain-security/)
+- [Waystar Vulnerability Disclosure](https://apis.io/security/waystar/waystar-vulnerability-disclosure/)
 
-## Timestamps
+#### Plans and pricing (1)
 
-- **Created:** 2026-07-04
-- **Modified:** 2026-07-04
+Published plans, tiers and prices.
 
-## APIs (Modeled)
+- [Waystar Plans Pricing](https://apis.io/plans/waystar/waystar-plans-pricing/)
 
-### Waystar Eligibility Verification API
+#### Rate limits (1)
 
-Real-time and batch insurance eligibility and benefits verification (X12 270/271) — coverage, plan details, copays, deductibles, and service-type benefits before a visit.
+Published request limits.
 
-- **Human URL:** [https://www.waystar.com/our-platform/financial-clearance/eligibility-verification/](https://www.waystar.com/our-platform/financial-clearance/eligibility-verification/)
+- [Waystar Rate Limits](https://apis.io/rate-limits/waystar/waystar-rate-limits/)
 
-### Waystar Authorization & Referral API
+#### FinOps (1)
 
-Prior authorization and referral determination and status (X12 278), with RPA/payer-portal automation where payers lack a transaction.
+What the API costs to run, by operation.
 
-- **Human URL:** [https://www.waystar.com/our-platform/financial-clearance/authorizations/](https://www.waystar.com/our-platform/financial-clearance/authorizations/)
+- [Waystar Finops](https://apis.io/finops/waystar/waystar-finops/)
 
-### Waystar Patient Estimation API
+## Where to find this API
 
-Pre-service, good-faith patient cost estimates combining eligibility/benefits, contracted rates, and procedure codes for price transparency and up-front collections.
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
-- **Human URL:** [https://www.waystar.com/our-platform/financial-clearance/coverage-detection/](https://www.waystar.com/our-platform/financial-clearance/coverage-detection/)
+- [Website](https://www.waystar.com/)
+- [Documentation](https://developer.waystar.com/)
+- [Getting started](https://developer.waystar.com/documents/integration-basics/)
+- [API reference](https://developer.waystar.com/documents/)
+- [Pricing](https://www.waystar.com/clients-partners/)
+- [Sign up](https://www.waystar.com/clients-partners/)
+- [Support](https://www.waystar.com/support/)
+- [Blog](https://www.waystar.com/blog/)
+- [Security](https://www.waystar.com/responsible-disclosure/)
+- [Terms of service](https://www.waystar.com/terms/)
+- [Privacy policy](https://www.waystar.com/privacy-policy/)
+- [GitHub](https://github.com/WaystarInc)
+- [Status](http://status.esolutionsinc.com/)
 
-### Waystar Claim Management API
+## API Evangelist rating
 
-Submit, scrub, edit, track, and manage professional, institutional, and dental claims (X12 837P/I/D) through the clearinghouse.
+**Kin Score 43.9** — developing · rubric 0.25.0 · scored 2026-10-23
 
-- **Human URL:** [https://www.waystar.com/our-platform/claim-management/claim-manager/](https://www.waystar.com/our-platform/claim-management/claim-manager/)
+| Facet | Score |
+|---|---|
+| Discoverability | 62.5 |
+| Contract quality | 0.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 60.5 |
+| Developer ergonomics | 64.3 |
+| Access clarity | 65.8 |
 
-### Waystar Claim Status API
+**Agent readiness 11.2** — agent-aware
 
-Query and monitor claim status across payers (X12 276/277) — received, accepted, pending, denied, paid.
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | — |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | documented (partial credit) |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
 
-- **Human URL:** [https://www.waystar.com/our-platform/claim-management/claim-monitoring/](https://www.waystar.com/our-platform/claim-management/claim-monitoring/)
+**Regulatory alignment 27.2** — Insurance
 
-### Waystar Remittance & ERA API
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/waystar/](https://apis.io/providers/waystar/).
 
-Retrieve electronic remittance advice (835/ERA), payments, and adjustments for automated payment posting and reconciliation.
+## How this profile is made
 
-- **Human URL:** [https://www.waystar.com/our-platform/payment-management/remit-manager/](https://www.waystar.com/our-platform/payment-management/remit-manager/)
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
 
-### Waystar Denial & Appeal Management API
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Waystar: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
 
-Identify denials, expose denial/remark codes and EOB detail, and support appeal creation, packaging, and resubmission.
+## Open an issue
 
-- **Human URL:** [https://www.waystar.com/our-platform/denial-prevention-recovery/denial-recovery/](https://www.waystar.com/our-platform/denial-prevention-recovery/denial-recovery/)
-
-## Common Properties
-
-**Waystar pages**
-
-- [Website](https://www.waystar.com/) · [LinkedIn](https://www.linkedin.com/company/waystar) · [Blog](https://www.waystar.com/blog/)
-- [Developer portal](https://developer.waystar.com/) · [API reference index](https://developer.waystar.com/documents/) · [Integration basics](https://developer.waystar.com/documents/integration-basics/)
-- [Clients & partners (sign up)](https://www.waystar.com/clients-partners/) · [Login](https://www.waystar.com/login/) · [Support](https://www.waystar.com/support/)
-- [Terms and conditions](https://www.waystar.com/terms/) · [Privacy policy](https://www.waystar.com/privacy-policy/) · [Responsible disclosure](https://www.waystar.com/responsible-disclosure/)
-- [GitHub organization](https://github.com/WaystarInc) — two forked CI/CD example repos, last pushed 2023, no API artifacts
-- [Status page](http://status.esolutionsinc.com/) — a first-party Pingdom uptime dashboard on the Waystar-owned `esolutionsinc.com` domain. **HTTP only**, unlinked from every Waystar property, and it does not monitor the newer API hosts.
-
-**Artifacts in this repository**
-
-- [Authentication](authentication/waystar-authentication.yml) · [Conventions / idempotency](conventions/waystar-conventions.yml) · [Error catalog](errors/waystar-problem-types.yml)
-- [Lifecycle](lifecycle/waystar-lifecycle.yml) · [Conformance](conformance/waystar-conformance.yml) · [Sandbox](sandbox/waystar-sandbox.yml) · [Data model](data-model/waystar-data-model.yml)
-- [Packages](packages/waystar-packages.yml) · [MCP](mcp/waystar-mcp.yml) · [llms.txt](llms/waystar-llms.txt) · [Well-known probe](well-known/waystar-well-known.yml)
-- [Plans](plans/waystar-plans-pricing.yml) · [Rate limits](rate-limits/waystar-rate-limits.yml) · [Fin Ops](finops/waystar-finops.yml)
-- [Domain security](security/waystar-domain-security.yml) · [Vulnerability disclosure](security/waystar-vulnerability-disclosure.yml)
-
-**Deliberately absent** — no `Compliance`, `TrustCenter`, `WellKnown`, `SecurityTxt`, `MCPServer`, `AgentCard`, `AgentSkill`, `SDKs`, `Deprecation`, `Pricing`, `Roadmap` or `Postman` pointer is emitted, because Waystar publishes none of them. The certifications Waystar claims (HIPAA, PCI DSS, SSAE 16, EHNAC, GLBA) sit behind the developer-portal login, so they are recorded in `conformance/` but not asserted as published.
-
-## Maintainers
-
-**FN:** Kin Lane
-**Email:** kin@apievangelist.com
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/waystar/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
